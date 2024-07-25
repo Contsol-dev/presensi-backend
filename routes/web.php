@@ -1,12 +1,20 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\LogsController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LogsController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/token', function () {
+    return csrf_token();
+});
+
+Route::get('/users', [UserController::class, 'getUsers']);
+
+Route::post('/log-baru', [LogsController::class, 'logBaru']);
 
 Route::get('/token', function () {
     return csrf_token();

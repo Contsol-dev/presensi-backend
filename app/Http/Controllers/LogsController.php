@@ -2,11 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Log;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log as Logger;
 
 class LogsController extends Controller
 {
+    public function logBaru(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|exists:users,username',
+            'tanggal' => 'required|date',
+        ]);
+
+        $user = User::where('username', $request->username)->first();
+
+        $log = new Log();
+        $log->user_id = $user->id;
+        $log->tanggal = $request->tanggal; // '2024-07-25'
+        // $log->tanggal = Carbon::parse($request->tanggal)->format('Y-m-d');
+        $log->save();
+
+        return response()->json([
+            'message' => 'Log entry created successfully',
+            'log' => $log
+        ], 201);
+    }
+
     public function masuk(Request $request) {
         $request->validate([
             'user_id' => 'required|exists:logs,user_id',
@@ -15,7 +38,7 @@ class LogsController extends Controller
         ]);
 
         $log = Log::where('user_id', $request->user_id)
-                    ->where('tanggal', $request->masuk)
+                    ->where('tanggal', $request->tanggal)
                     ->first();
 
         if ($log) {
@@ -25,7 +48,7 @@ class LogsController extends Controller
             return response()->json([
                 'message' => 'Sukses update jam masuk',
                 'masuk' => $log->masuk,
-                'next' => 'Istirahat'
+                'next' => 'istirahat'
             ], 200);
         } else {
             return response()->json([
@@ -50,9 +73,9 @@ class LogsController extends Controller
             $log->save();
 
             return response()->json([
-                'message' => 'Sukses update jam istirahat',
+                'message' => 'Sukses update jam masuk',
                 'istirahat' => $log->istirahat,
-                'next' => 'Kembali'
+                'next' => 'kembali'
             ], 200);
         } else {
             return response()->json([
@@ -79,7 +102,7 @@ class LogsController extends Controller
             return response()->json([
                 'message' => 'Sukses update jam kembali',
                 'kembali' => $log->kembali,
-                'next' => 'Pulang'
+                'next' => 'pulang'
             ], 200);
         } else {
             return response()->json([
@@ -133,6 +156,32 @@ class LogsController extends Controller
             return response()->json([
                 'message' => 'Sukses update kebaikan',
                 'kebaikan' => $log->kebaikan
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'Gagal'
+            ], 404);
+        }
+    }
+    
+    public function logActivity(Request $request) {
+        $request->validate([
+            'user_id' => 'required|exists:logs,user_id',
+            'tanggal' => 'required|date|exists:logs,tanggal',
+            'log_activity' => 'string',
+        ]);
+    
+        $log = Log::where('user_id', $request->user_id)
+                    ->where('tanggal', $request->tanggal)
+                    ->first();
+    
+        if ($log) {
+            $log->log_activity = $request->log_activity;
+            $log->save();
+    
+            return response()->json([
+                'message' => 'Sukses update log_activity',
+                'log_activity' => $log->log_activity
             ], 200);
         } else {
             return response()->json([

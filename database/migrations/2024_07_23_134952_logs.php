@@ -19,8 +19,8 @@ return new class extends Migration
             $table->time('istirahat')->nullable();
             $table->time('kembali')->nullable();
             $table->time('pulang')->nullable();
-            $table->string('log_activity')->nullable();
-            $table->integer('kebaikan')->nullable();
+            $table->text('log_activity')->nullable();
+            $table->text('kebaikan')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
