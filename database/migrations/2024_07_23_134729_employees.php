@@ -16,7 +16,6 @@ return new class extends Migration
             $table->date('tanggal_masuk');
             $table->date('tanggal_keluar')->nullable();
             $table->unsignedBigInteger('divisi_id');
-            $table->string('project');
             $table->string('shift');
             $table->string('status_pegawai');
             $table->unsignedBigInteger('nilai_id');
