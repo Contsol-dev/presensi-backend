@@ -22,10 +22,11 @@ class AuthController extends Controller
         ];
 
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|unique:users',
             'username' => 'required|string',
+            'nama' => 'required|string',
+            'email' => 'required|email|unique:users',
             'password' => 'required|min:8',
-            'konfirm_password' => 'required|min:8|same:password', // Menggunakan 'same:password' untuk memastikan password sama
+            'konfirm_password' => 'required|min:8|same:password',
         ], $messages);
 
         if ($validator->fails()) {
@@ -35,11 +36,12 @@ class AuthController extends Controller
         $data = $request->all();
         if ($data['password'] === $data['konfirm_password']) {
             $user = new User();
+            $user->nama = $data['nama'];
             $user->email = $data['email'];
             $user->username = $data['username'];
             $user->password = Hash::make($data['password']);
             $user->konfirmasi_email = false;
-            $user->status_akun = 'magang';
+            $user->status_akun = 'aktif';
             $user->save();
             return response()->json(['success' => true, 'message' => 'register berhasil']);
         } else {
