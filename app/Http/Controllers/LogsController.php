@@ -115,7 +115,7 @@ class LogsController extends Controller
             $log->save();
 
             return response()->json([
-                'message' => 'Sukses update jam masuk',
+                'message' => 'Sukses update jam istirahat',
                 'istirahat' => $log->istirahat,
                 'next' => 'kembali'
             ], 200);
