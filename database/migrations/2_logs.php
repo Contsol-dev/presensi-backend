@@ -12,8 +12,8 @@ return new class extends Migration
     public function up()
     {
         Schema::create('logs', function (Blueprint $table) {
-            $table->id('log_id');
-            $table->unsignedBigInteger('user_id');
+            $table->id('id');
+            $table->string('username');
             $table->date('tanggal');
             $table->time('masuk')->nullable();
             $table->time('istirahat')->nullable();
@@ -21,9 +21,14 @@ return new class extends Migration
             $table->time('pulang')->nullable();
             $table->text('log_activity')->nullable();
             $table->text('kebaikan')->nullable();
+            $table->boolean('terlambat_masuk')->nullable();
+            $table->boolean('istirahat_awal')->nullable();
+            $table->boolean('terlambat_kembali')->nullable();
+            $table->boolean('pulang_awal')->nullable();
+            $table->text('kehadiran')->nullable();
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('username')->references('username')->on('users')->onDelete('cascade');
         });
     }
 

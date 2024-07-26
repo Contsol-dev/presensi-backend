@@ -14,13 +14,23 @@ class Log extends Model
 
 
     protected $fillable = [
-        'user_id',
+        'username',
         'tanggal',
         'masuk',
         'istirahat',
         'kembali',
         'pulang',
         'log_activity',
-        'kebaikan'
+        'kebaikan',
+        'terlambat_masuk',
+        'istirahat_awal',
+        'terlambat_kembali',
+        'pulang_awal',
+        'kehadiran'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'username', 'username');
+    }
 }
