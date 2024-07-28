@@ -1,11 +1,75 @@
 <h1> API Documentation </h1>
 
+
+# POST /register
+register user (pemagang) baru <br>
+<b>body:</b>
+```
+{
+    "username": "contsoldev",
+    "nama": "Cont Solutions Indonesia",
+    "email": "contsolhelp@gmail.com",
+    "password": "admin#1234",
+    "konfirm_password": "admin#1234"
+}
+```
+<b>Response berhasil:</b>
+```
+{
+    "success": true,
+    "message": "register berhasil"
+}
+```
+
+# POST /login
+<b>body:</b>
+```
+{
+    "email": "contsoldev@gmail.com",
+    "password": "admin#1234"
+}
+```
+<b>response sukses:</b>
+```
+{
+    "success": true,
+    "message": "login sukses"
+}
+```
+
+# GET /logout
+<b>response sukses:</b>
+```
+{
+    "success": true,
+    "message": "logout berhasil"
+}
+```
+
+# POST /reset-password
+mengirim permintaan reset password. mengirim email otomatis ke email yang diinputkan
+<b>body:</b>
+```
+{
+    "email": "contsolhelp@gmail.com"
+}
+```
+<b>response:</b>
+```
+{
+    "message": "Request token reset password berhasil dibuat."
+}
+```
+
+# GET /reset-password/{token}
+request dari link yg dikirim melalui email.
+
 # POST /log-baru
 Membuat row baru di tabel logs <br>
 <b>Body:</b>
 ```
 {
-    "username": "johndoe",
+    "username": "contsoldev",
     "tanggal": "2024-05-07" // format: YYYY-MM-DD
 }
 ```
@@ -14,7 +78,7 @@ Membuat row baru di tabel logs <br>
 {
     "message": "Log entry created successfully",
     "log": {
-      "user_id": 1,
+      "username": "contsoldev",
       "tanggal": "2024-05-07"
     }
 }
@@ -25,7 +89,7 @@ mengupdate checkpoint jam presensi <br>
 <b>Body:</b>
 ```
 {
-    "user_id": "1",
+    "username": "contsoldev",
     "tanggal": "2024-05-07",
     "masuk": "11:42:00" //format: hh:mm:ss
 }
@@ -44,7 +108,7 @@ mengupdate checkpoint jam istirahat <br>
 <b>Body:</b>
 ```
 {
-    "user_id": "1",
+    "username": "contsoldev",
     "tanggal": "2024-05-07",
     "istirahat": "11:42:00" //format: hh:mm:ss
 }
@@ -63,7 +127,7 @@ mengupdate checkpoint jam kembali dari istirahat <br>
 <b>Body:</b>
 ```
 {
-    "user_id": "1",
+    "username": "contsoldev",
     "tanggal": "2024-05-07",
     "kembali": "11:42:00" //format: hh:mm:ss
 }
@@ -82,7 +146,7 @@ mengupdate checkpoint jam pulang <br>
 <b>Body:</b>
 ```
 {
-    "user_id": "1",
+    "username": "contsoldev",
     "tanggal": "2024-05-07",
     "pulang": "11:42:00" //format: hh:mm:ss
 }
@@ -97,15 +161,37 @@ mengupdate checkpoint jam pulang <br>
 ```
 
 # POST /log-activity
+menambah logbook harian <br>
+<b>Body:</b>
+```
+{
+    "username" => "contsoldev",
+    "tanggal" => "2024-05-07",
+    "log_activity" => "menambahkan 5 endpoint dan mengupdate migration",
+}
+```
+<b>Response Berhasil:</b>
+```
+{
+    "message": "Sukses menambahkan log activity harian",
+    "log_activity": "menambahkan 5 endpoint dan mengupdate migration"
+}
+```
 
 # POST /kebaikan
-
-# POST /register
-
-# POST /login
-
-# GET /logout
-
-# POST /reset-password
-
-# GET /reset-password/{token}
+menambah kebaikan harian <br>
+<b>Body:</b>
+```
+{
+    "username" => "contsoldev",
+    "tanggal" => "2024-05-07",
+    "kebaikan" => "apa gitu hal yang sekiranya baik",
+}
+```
+<b>Response Berhasil:</b>
+```
+{
+    "message": "Sukses menambahkan log activity harian",
+    "kebaikan": "apa gitu hal yang sekiranya baik"
+}
+```
