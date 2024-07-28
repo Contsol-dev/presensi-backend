@@ -31,12 +31,9 @@ class LogsController extends Controller
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
         }
 
-        $user = User::where('username', $request->username)->first();
-
         $log = new Log();
-        $log->user_id = $user->id;
+        $log->username = $request->username;
         $log->tanggal = $request->tanggal; // '2024-07-25'
-        // $log->tanggal = Carbon::parse($request->tanggal)->format('Y-m-d');
         $log->save();
 
         return response()->json([
@@ -47,11 +44,11 @@ class LogsController extends Controller
 
     public function masuk(Request $request) {
         $messages = [
-            'user_id.exists' => 'User tidak ada'
+            'username.exists' => 'User tidak ada'
         ];
 
         $validator = Validator::make([
-            'user_id' => 'required|exists:logs,user_id',
+            'username' => 'required|exists:logs,username',
             'tanggal' => 'required|date|exists:logs,tanggal',
             'masuk' => 'required|date_format:H:i:s',
         ], $messages);
@@ -64,7 +61,7 @@ class LogsController extends Controller
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
         }
 
-        $log = Log::where('user_id', $request->user_id)
+        $log = Log::where('username', $request->username)
                     ->where('tanggal', $request->tanggal)
                     ->first();
 
@@ -86,29 +83,29 @@ class LogsController extends Controller
 
     public function istirahat(Request $request) {
         $messages = [
-            'user_id.exists' => 'User tidak ada',
+            'username.exists' => 'User tidak ada',
             'tanggal.exists' => 'Log hari ini belum ada',
             'istirahat.required' => 'istirahat jam berapa',
             'istirahat.date_format' => 'Format jam salah'
         ];
 
         $validator = Validator::make([
-            'user_id' => 'required|exists:logs,user_id',
+            'username' => 'required|exists:logs,username',
             'tanggal' => 'required|date|exists:logs,tanggal',
             'istirahat' => 'required|date_format:H:i:s',
         ], $messages);
 
-        $log = Log::where('user_id', $request->user_id)
+        $log = Log::where('username', $request->username)
                     ->where('tanggal', $request->tanggal)
                     ->first();
 
-                    if (!Auth::check()) {
-                        return response()->json(['message' => 'Uanuthorized'], 401);
-                    }
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
 
-                    if ($validator->fails()) {
-                        return response()->json(['success' => false, 'errors' => $validator->errors()]);
-                    }
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()]);
+        }
 
         if ($log) {
             $log->istirahat = $request->istirahat;
@@ -128,14 +125,14 @@ class LogsController extends Controller
 
     public function kembali(Request $request) {
         $messages = [
-            'user_id.exists' => 'User tidak ada',
+            'username.exists' => 'User tidak ada',
             'tanggal.exists' => 'Log hari ini belum ada',
             'kembali.required' => 'kembali jam berapa',
             'kembali.date_format' => 'Format jam salah'
         ];
 
         $validator = Validator::make([
-            'user_id' => 'required|exists:logs,user_id',
+            'username' => 'required|exists:logs,username',
             'tanggal' => 'required|date|exists:logs,tanggal',
             'kembali' => 'required|date_format:H:i:s',
         ], $messages);
@@ -148,7 +145,7 @@ class LogsController extends Controller
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
         }
 
-        $log = Log::where('user_id', $request->user_id)
+        $log = Log::where('username', $request->username)
                     ->where('tanggal', $request->tanggal)
                     ->first();
 
@@ -170,27 +167,27 @@ class LogsController extends Controller
 
     public function pulang(Request $request) {
         $messages = [
-            'user_id.exists' => 'User tidak ada',
+            'username.exists' => 'User tidak ada',
             'tanggal.exists' => 'Log hari ini belum ada',
             'pulang.required' => 'pulang jam berapa',
             'pulang.date_format' => 'Format jam salah'
         ];
 
         $validator = Validator::make([
-            'user_id' => 'required|exists:logs,user_id',
+            'username' => 'required|exists:logs,username',
             'tanggal' => 'required|date|exists:logs,tanggal',
             'pulang' => 'required|date_format:H:i:s',
         ], $messages);
 
         if (!Auth::check()) {
-            return response()->json(['message' => 'Uanuthorized'], 401);
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
         }
 
-        $log = Log::where('user_id', $request->user_id)
+        $log = Log::where('username', $request->username)
                     ->where('tanggal', $request->tanggal)
                     ->first();
 
@@ -212,26 +209,26 @@ class LogsController extends Controller
 
     public function kebaikan(Request $request) {
         $messages = [
-            'user_id.exists' => 'User tidak ada',
+            'username.exists' => 'User tidak ada',
             'tanggal.exists' => 'Log hari ini belum ada',
             'kebaikan.required' => 'Belum ada kebaikan yang kamu ceritakan'
         ];
 
         $validator = Validator::make([
-            'user_id' => 'required|exists:logs,user_id',
+            'username' => 'required|exists:logs,username',
             'tanggal' => 'required|date|exists:logs,tanggal',
             'kebaikan' => 'required',
         ], $messages);
 
         if (!Auth::check()) {
-            return response()->json(['message' => 'Uanuthorized'], 401);
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
         }
 
-        $log = Log::where('user_id', $request->user_id)
+        $log = Log::where('username', $request->username)
                     ->where('tanggal', $request->tanggal)
                     ->first();
 
@@ -252,26 +249,26 @@ class LogsController extends Controller
 
     public function logActivity(Request $request) {
         $messages = [
-            'user_id.exists' => 'User tidak ada',
+            'username.exists' => 'User tidak ada',
             'tanggal.exists' => 'Log hari ini belum ada',
             'log_activity.required' => 'Belum ada log activity'
         ];
 
         $validator = Validator::make([
-            'user_id' => 'required|exists:logs,user_id',
+            'username' => 'required|exists:logs,username',
             'tanggal' => 'required|date|exists:logs,tanggal',
             'log_activity' => 'required|string',
         ], $messages);
 
         if (!Auth::check()) {
-            return response()->json(['message' => 'Uanuthorized'], 401);
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
         }
 
-        $log = Log::where('user_id', $request->user_id)
+        $log = Log::where('username', $request->username)
                     ->where('tanggal', $request->tanggal)
                     ->first();
 

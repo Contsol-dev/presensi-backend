@@ -70,7 +70,6 @@ class AuthController extends Controller
         ];
 
         if (Auth::attempt($data)) {
-            for ($i = 0;$i <)
             return response()->json(['success' => true, 'message' => 'login sukses']);
         } else {
             Session::flash('error', 'Email atau password salah!');

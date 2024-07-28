@@ -26,6 +26,10 @@ class ResetPasswordController extends Controller
         );
 
         Mail::to($request->email)->send(new ResetPassword($token));
+
+        return response()->json([
+            'message' => 'Request token reset password berhasil dibuat.'
+        ], 200);
     }
 
     public function useToken($token) {
