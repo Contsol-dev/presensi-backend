@@ -9,19 +9,12 @@ use App\Http\Controllers\ResetPasswordController;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/token', function () {
-    return csrf_token();
-});
 
 Route::get('/users', [UserController::class, 'getUsers']);
 
 Route::post('/log-baru', [LogsController::class, 'logBaru']);
 
 Route::post('/get-log', [LogsController::class, 'getLog']);
-
-Route::get('/token', function () {
-    return csrf_token();
-});
 
 Route::post('/presensi-masuk', [LogsController::class, 'masuk']);
 

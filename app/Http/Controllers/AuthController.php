@@ -89,11 +89,13 @@ class AuthController extends Controller
                     ->first();
 
         if (Auth::attempt($data)) {
+            $token = $request->session()->token();
             return response()->json([
                 'success' => true, 
                 'message' => 'login sukses',
                 'username' => $userInfo->username,
-                'nama' => $userInfo->detail->nama
+                'nama' => $userInfo->detail->nama,
+                'token' => $token
             ]);
         } else {
             Session::flash('error', 'Email atau password salah!');

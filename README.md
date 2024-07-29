@@ -39,7 +39,8 @@ register user (pemagang) baru <br>
     "success": true,
     "message": "login sukses",
     "username": "contsoldev",
-    "nama": "Cont Solutions Indonesia"
+    "nama": "Cont Solutions Indonesia",
+    "token": token CSRF, sebagai header post, put, delete request "X-CSRF-TOKEN"
 }
 ```
 
