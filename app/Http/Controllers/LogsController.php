@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Log;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as Logger;
@@ -23,23 +24,42 @@ class LogsController extends Controller
             'tanggal' => 'required|date',
         ], $messages);
 
-        if (!Auth::check()) {
-            return response()->json(['message' => 'Uanuthorized'], 401);
-        }
+        // if (!Auth::check()) {
+        //     return response()->json(['message' => 'Uanuthorized'], 401);
+        // }
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
         }
 
-        $log = new Log();
-        $log->username = $request->username;
-        $log->tanggal = $request->tanggal; // '2024-07-25'
-        $log->save();
+        $now = Carbon::now();
+        $tanggal = $now->format('Y-m-d');
 
-        return response()->json([
-            'message' => 'Log entry created successfully',
-            'log' => $log
-        ], 201);
+        $todayLog = Log::where('tanggal', '=', $tanggal)
+            ->first();
+
+        if ($todayLog) {
+            return response()->json([
+                'message' => 'Log already exists'
+            ]);
+        } else {
+            $log = new Log();
+            $log->username = $request->username;
+            $log->tanggal = $request->tanggal; // '2024-07-25'
+            $log->save();
+
+            return response()->json([
+                'message' => 'Log entry created successfully',
+                'log' => $log
+            ], 201);
+        }
+    }
+
+    public function getLog(Request $request) {
+        $log = Log::where('username', '=', $request->username)
+            ->where('tanggal', '=', $request->tanggal)
+            ->first();
+        return response()->json(['log' => $log]);
     }
 
     public function masuk(Request $request) {
@@ -53,9 +73,9 @@ class LogsController extends Controller
             'masuk' => 'required|date_format:H:i:s',
         ], $messages);
 
-        if (!Auth::check()) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
+        // if (!Auth::check()) {
+        //     return response()->json(['message' => 'Unauthorized'], 401);
+        // }
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
@@ -99,9 +119,9 @@ class LogsController extends Controller
                     ->where('tanggal', $request->tanggal)
                     ->first();
 
-        if (!Auth::check()) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
+        // if (!Auth::check()) {
+        //     return response()->json(['message' => 'Unauthorized'], 401);
+        // }
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
@@ -137,9 +157,9 @@ class LogsController extends Controller
             'kembali' => 'required|date_format:H:i:s',
         ], $messages);
 
-        if (!Auth::check()) {
-            return response()->json(['message' => 'Uanuthorized'], 401);
-        }
+        // if (!Auth::check()) {
+        //     return response()->json(['message' => 'Uanuthorized'], 401);
+        // }
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
@@ -179,9 +199,9 @@ class LogsController extends Controller
             'pulang' => 'required|date_format:H:i:s',
         ], $messages);
 
-        if (!Auth::check()) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
+        // if (!Auth::check()) {
+        //     return response()->json(['message' => 'Unauthorized'], 401);
+        // }
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
@@ -220,9 +240,9 @@ class LogsController extends Controller
             'kebaikan' => 'required',
         ], $messages);
 
-        if (!Auth::check()) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
+        // if (!Auth::check()) {
+        //     return response()->json(['message' => 'Unauthorized'], 401);
+        // }
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
@@ -260,9 +280,9 @@ class LogsController extends Controller
             'log_activity' => 'required|string',
         ], $messages);
 
-        if (!Auth::check()) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
+        // if (!Auth::check()) {
+        //     return response()->json(['message' => 'Unauthorized'], 401);
+        // }
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()]);

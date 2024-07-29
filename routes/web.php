@@ -17,6 +17,8 @@ Route::get('/users', [UserController::class, 'getUsers']);
 
 Route::post('/log-baru', [LogsController::class, 'logBaru']);
 
+Route::post('/get-log', [LogsController::class, 'getLog']);
+
 Route::get('/token', function () {
     return csrf_token();
 });
@@ -41,4 +43,4 @@ Route::get('/reset-password/{token}', [ResetPasswordController::class, 'useToken
 
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('/logout', [AuthController::class, 'logout'])->middleware('auth');
+Route::get('/logout', [AuthController::class, 'logout']);
