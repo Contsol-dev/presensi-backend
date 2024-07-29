@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DetailUser;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,10 +24,15 @@ class AuthController extends Controller
 
         $validator = Validator::make($request->all(), [
             'username' => 'required|string',
-            'nama' => 'required|string',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:8',
             'konfirm_password' => 'required|min:8|same:password',
+            'nama' => 'required|string',
+            'nomor_hp' => 'required',
+            'tempat_lahir' => 'required|string',
+            'tanggal_lahir' => 'required|date',
+            'asal_sekolah' => 'required|string'
+
         ], $messages);
 
         if ($validator->fails()) {
@@ -36,13 +42,22 @@ class AuthController extends Controller
         $data = $request->all();
         if ($data['password'] === $data['konfirm_password']) {
             $user = new User();
-            $user->nama = $data['nama'];
             $user->email = $data['email'];
             $user->username = $data['username'];
             $user->password = Hash::make($data['password']);
-            $user->konfirmasi_email = false;
+            $user->konfirmasi_admin = false;
             $user->status_akun = 'aktif';
             $user->save();
+
+            $detailUser = new DetailUser();
+            $detailUser->username = $data['username'];
+            $detailUser->nama = $data['nama'];
+            $detailUser->asal_sekolah = $data['asal_sekolah'];
+            $detailUser->tempat_lahir = $data['tempat_lahir'];
+            $detailUser->tanggal_lahir = $data['tanggal_lahir'];
+            $detailUser->nomor_hp = $data['nomor_hp'];
+            $detailUser->save();
+
             return response()->json(['success' => true, 'message' => 'register berhasil']);
         } else {
             return response()->json(['success' => false, 'message' => 'password tidak sama']);
@@ -69,8 +84,17 @@ class AuthController extends Controller
             'password' => $request->password
         ];
 
+        $userInfo = User::where('email', $request->email)
+                    ->with('detail')
+                    ->first();
+
         if (Auth::attempt($data)) {
-            return response()->json(['success' => true, 'message' => 'login sukses']);
+            return response()->json([
+                'success' => true, 
+                'message' => 'login sukses',
+                'username' => $userInfo->username,
+                'nama' => $userInfo->detail->nama
+            ]);
         } else {
             Session::flash('error', 'Email atau password salah!');
             return response()->json(['success' => false, 'message' => 'login gagal']);

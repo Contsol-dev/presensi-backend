@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -20,7 +21,7 @@ return new class extends Migration
             $table->string('nomor_hp');
             $table->string('nip')->nullable();
             $table->string('status_pegawai')->default('magang');
-            $table->date('tanggal_masuk');
+            $table->date('tanggal_masuk')->nullable();
             $table->date('tanggal_keluar')->nullable();
             $table->unsignedBigInteger('divisi_id')->nullable();
             $table->unsignedBigInteger('shift_id')->nullable();

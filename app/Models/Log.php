@@ -10,7 +10,7 @@ class Log extends Model
     use HasFactory;
 
     protected $table = 'logs';
-    protected $primaryKey = 'log_id';
+    protected $primaryKey = 'id';
 
 
     protected $fillable = [

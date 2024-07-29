@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('username')->primary();
             $table->string('email')->unique();
             $table->string('password');
-            $table->boolean('konfirmasi_email')->default(false);
+            $table->boolean('konfirmasi_admin')->default(false);
             $table->string('status_akun')->default('aktif');
             $table->rememberToken();
             $table->timestamps();

@@ -54,7 +54,7 @@ class LogsController extends Controller
         ], $messages);
 
         if (!Auth::check()) {
-            return response()->json(['message' => 'Uanuthorized'], 401);
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         if ($validator->fails()) {
