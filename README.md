@@ -7,10 +7,14 @@ register user (pemagang) baru <br>
 ```
 {
     "username": "contsoldev",
-    "nama": "Cont Solutions Indonesia",
     "email": "contsolhelp@gmail.com",
     "password": "admin#1234",
-    "konfirm_password": "admin#1234"
+    "konfirm_password": "admin#1234",
+    "nama": "Cont Solutions Indonesia",
+    "nomor_hp": "08833351344",
+    "tempat_lahir": "Sleman",
+    "tanggal_lahir": "2024-07-13",
+    "asal_sekolah": "UPN Veteran Yogyakarta"
 }
 ```
 <b>Response berhasil:</b>
@@ -25,7 +29,7 @@ register user (pemagang) baru <br>
 <b>body:</b>
 ```
 {
-    "email": "contsoldev@gmail.com",
+    "email": "contsolhelp@gmail.com",
     "password": "admin#1234"
 }
 ```
@@ -33,7 +37,9 @@ register user (pemagang) baru <br>
 ```
 {
     "success": true,
-    "message": "login sukses"
+    "message": "login sukses",
+    "username": "contsoldev",
+    "nama": "Cont Solutions Indonesia"
 }
 ```
 
@@ -117,7 +123,7 @@ mengupdate checkpoint jam istirahat <br>
 ```
 {
     "message": "Sukses update jam istirahat",
-    "masuk": "11:42:00",
+    "istirahat": "11:42:00",
     "next": "kembali"
 }
 ```
@@ -165,9 +171,9 @@ menambah logbook harian <br>
 <b>Body:</b>
 ```
 {
-    "username" => "contsoldev",
-    "tanggal" => "2024-05-07",
-    "log_activity" => "menambahkan 5 endpoint dan mengupdate migration",
+    "username": "contsoldev",
+    "tanggal": "2024-05-07",
+    "log_activity": "menambahkan 5 endpoint dan mengupdate migration",
 }
 ```
 <b>Response Berhasil:</b>
@@ -183,9 +189,9 @@ menambah kebaikan harian <br>
 <b>Body:</b>
 ```
 {
-    "username" => "contsoldev",
-    "tanggal" => "2024-05-07",
-    "kebaikan" => "apa gitu hal yang sekiranya baik",
+    "username": "contsoldev",
+    "tanggal": "2024-05-07",
+    "kebaikan": "apa gitu hal yang sekiranya baik",
 }
 ```
 <b>Response Berhasil:</b>
