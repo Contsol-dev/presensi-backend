@@ -16,10 +16,6 @@ Route::post('/log-baru', [LogsController::class, 'logBaru']);
 
 Route::post('/get-log', [LogsController::class, 'getLog']);
 
-Route::get('/token', function () {
-    return csrf_token();
-});
-
 Route::post('/presensi-masuk', [LogsController::class, 'masuk']);
 
 Route::post('/presensi-istirahat', [LogsController::class, 'istirahat']);
