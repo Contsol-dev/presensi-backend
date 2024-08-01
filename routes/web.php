@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LogsController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AdminPageController;
 use App\Http\Controllers\ResetPasswordController;
 
 Route::get('/', function () {
@@ -39,3 +40,5 @@ Route::get('/reset-password/{token}', [ResetPasswordController::class, 'useToken
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/logout', [AuthController::class, 'logout']);
+
+Route::get('/admin/dashboard', [AdminPageController::class, 'dashboard']);
