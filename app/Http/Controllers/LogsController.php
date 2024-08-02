@@ -12,8 +12,7 @@ use Illuminate\Support\Facades\Validator;
 
 class LogsController extends Controller
 {
-    public function logBaru(Request $request)
-    {
+    public function logBaru(Request $request) {
         $messages = [
             'username.exists' => 'Username tidak ada',
             'tanggal.required' => 'Tanggal wajib diisi'

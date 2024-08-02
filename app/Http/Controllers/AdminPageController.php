@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\Log;
 use App\Models\User;
+use App\Models\Admin;
 use App\Models\DetailUser;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class AdminPageController extends Controller
 {
@@ -25,5 +28,65 @@ class AdminPageController extends Controller
         'izin' => $izin,
         'tidak_hadir' => $tidak_hadir,
       ]);
+    }
+
+    public function profile($admin_id) {
+        $profile = Admin::where('id', '=', $admin_id)
+            ->first();
+
+        if ($profile) {
+            return response()->json(['success' => true, 'profile' => $profile], 200);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Profil tidak ditemukan'], 404);
+        }
+    }
+
+    public function postProfile(Request $request) {
+        $messages = [
+            'admin_id.required' => 'Id admin tidak ada',
+            'photo.image' => 'File harus berupa gambar',
+            'photo.max' => 'Ukuran maksimal 2MB'
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'admin_id' => 'required',
+            'photo' => 'nullable|image|max:2048'
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()]);
+        }
+
+        $profile = Admin::where('id', '=', $request->admin_id)
+            ->first();
+
+        if ($profile) {
+            if ($request->nama) {
+                $profile->nama = $request->nama;
+            }
+            if ($request->email) {
+                $profile->email = $request->email;
+            }
+            if ($request->no_hp) {
+                $profile->no_hp = $request->no_hp;
+            }
+            if ($request->alamat) {
+                $profile->alamat = $request->alamat;
+            }
+            if ($request->about) {
+                $profile->about = $request->about;
+            }
+            if ($request->hasFile('photo')) {
+                $filename = time(). '.'. $request->photo->extension();
+                $request->photo->move(public_path('admin_photos'), $filename);
+                $profile->photo = 'admin_photos/' . $filename;
+            }
+
+            $profile->save();
+
+            return response()->json(['success' => true, 'message' => 'Profil Admin tersimpan']);
+        } else {
+            return response()->json(['success' => false, 'message' => "Admin tidak ditemukan"]);
+        }
     }
 }

@@ -41,4 +41,12 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/logout', [AuthController::class, 'logout']);
 
+Route::post('/admin/login', [AuthController::class, 'adminLogin']);
+
+Route::post('/admin/register', [AuthController::class, 'adminRegister']);
+
 Route::get('/admin/dashboard', [AdminPageController::class, 'dashboard']);
+
+Route::get('/admin/profile/{admin_id}', [AdminPageController::class, 'profile']);
+
+Route::post('/admin/profile', [AdminPageController::class, 'postProfile']);
