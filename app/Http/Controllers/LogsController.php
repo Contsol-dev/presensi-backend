@@ -62,6 +62,14 @@ class LogsController extends Controller
         return response()->json(['log' => $log]);
     }
 
+    public function getLogs(Request $request) {
+        $logs = Log::where('username', '=', $request->username)
+            ->orderBy('tanggal', 'desc')
+            ->select('id', 'tanggal', 'log_activity')
+            ->get();
+        return response()->json(['logs' => $logs]);
+    }
+
     public function masuk(Request $request) {
         $messages = [
             'username.exists' => 'User tidak ada'

@@ -17,6 +17,8 @@ Route::post('/log-baru', [LogsController::class, 'logBaru']);
 
 Route::post('/get-log', [LogsController::class, 'getLog']);
 
+Route::post('/get-logs', [LogsController::class, 'getLogs']);
+
 Route::post('/presensi-masuk', [LogsController::class, 'masuk']);
 
 Route::post('/presensi-istirahat', [LogsController::class, 'istirahat']);
