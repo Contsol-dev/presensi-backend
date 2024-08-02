@@ -89,4 +89,101 @@ class AdminPageController extends Controller
             return response()->json(['success' => false, 'message' => "Admin tidak ditemukan"]);
         }
     }
+
+    public function getPresensi(Request $request) {
+        $messages = [
+            'tanggal.date' => 'Format tanggal tidak valid',
+            'tanggal.exists' => 'Tanggal tidak ada',
+            'filter.string' => 'Filter harus berupa string',
+            'nama.string' => 'Nama harus berupa string'
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'tanggal' => 'nullable|date|date_format:Y-m-d|exists:logs,tanggal',
+            'filter' => 'nullable|string',
+            'nama' => 'nullable|string'
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()]);
+        }
+
+        $tanggal = Carbon::today();
+
+        if ($request->tanggal) {
+            $tanggal = $request->tanggal;
+        }
+
+        $presensi = Log::join('detail_users', 'logs.username', '=', 'detail_users.username')
+                ->select('detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
+                ->where('logs.tanggal', '=', $tanggal)
+                ->get();
+
+        if ($request->filter) {
+            $filter = $request->filter;
+            $presensi = Log::join('detail_users', 'logs.username', '=', 'detail_users.username')
+                ->select('detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
+                ->where('logs.tanggal', '=', $tanggal)
+                ->where('logs.kehadiran', '=', $filter)
+                ->get();
+        }
+
+        if ($request->nama) {
+            $presensi = Log::join('detail_users', 'logs.username', '=', 'detail_users.username')
+                ->select('detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
+                ->where('logs.tanggal', '=', $tanggal)
+                ->where('detail_users.nama', 'LIKE', '%' . $request->nama . '%')
+                ->get();
+            if ($request->filter) {
+                $filter = $request->filter;
+                $presensi = Log::join('detail_users', 'logs.username', '=', 'detail_users.username')
+                    ->select('detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
+                    ->where('logs.tanggal', '=', $tanggal)
+                    ->where('logs.kehadiran', '=', $filter)
+                    ->where('detail_users.nama', 'LIKE', '%' . $request->nama . '%')
+                    ->get();
+            }
+        }
+
+        $hadir = Log::where('kehadiran', '=', 'hadir')->count();
+        $izin = Log::where('kehadiran', '=', 'izin')->count();
+        $tidakHadir = Log::where('kehadiran', '=', 'tidak hadir')->count();
+
+        return response()->json([
+            'success' => true,
+            'presensi' => $presensi,
+            'hadir' => $hadir,
+            'izin' => $izin,
+            'tidakHadir' => $tidakHadir
+        ]);
+    }
+
+    public function getDetailPresensi(Request $request) {
+        $messages = [
+            'filter.string' => 'Filter harus berupa string',
+            'username.required' => 'Username harus ada',
+            'username.string' => 'Username harus berupa string',
+            'username.exists' => 'Username tidak ada/belum terdaftar'
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'filter' => 'nullable|string',
+            'username' => 'required|string|exists:users,username'
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()]);
+        }
+
+        $magang = DetailUser::where('username', '=', $request->username)
+            ->select('tanggal_masuk', 'tanggal_keluar')
+            ->first();
+
+        $presensi = Log::where('username', '=', $request->username)
+            ->get();
+
+        return response()->json(['success' => true, 'magang' => $magang, 'presensi' => $presensi]);
+
+        // TODO : nambahin data shift sama hitung"an jam kerja dll
+    }
 }

@@ -35,6 +35,7 @@ class LogsController extends Controller
         $tanggal = $now->format('Y-m-d');
 
         $todayLog = Log::where('tanggal', '=', $tanggal)
+            ->where('username', '=', $request->username)
             ->first();
 
         if ($todayLog) {
@@ -94,6 +95,7 @@ class LogsController extends Controller
 
         if ($log) {
             $log->masuk = $request->masuk;
+            $log->kehadiran = "masuk";
             $log->save();
 
             return response()->json([
