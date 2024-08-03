@@ -181,6 +181,7 @@ class AdminPageController extends Controller
         }
 
         $magang = DetailUser::join('shifts', 'detail_users.shift_id', '=', 'shifts.id')
+            ->where('detail_users.username', '=', $request->username)
             ->select('detail_users.tanggal_masuk', 'detail_users.tanggal_keluar', 'shifts.masuk', 'shifts.istirahat')
             ->get();
 
@@ -248,14 +249,14 @@ class AdminPageController extends Controller
     public function getLaporan(Request $request) {
         $messages = [
             'tanggal_mulai.date' => 'Format tanggal tidak valid',
-            'tanggal_mulai.exists' => 'Tanggal tidak ada',
+            'tanggal_mulai.before' => 'Tanggal mulai harus sebelum selesai',
             'tanggal_selesai.date' => 'Format tanggal tidak valid',
-            'tanggal_selesai.exists' => 'Tanggal tidak ada',
+            'tanggal_selesai.before' => 'Tanggal selesai lebih dari hari ini',
         ];
 
         $validator = Validator::make($request->all(), [
-            'tanggal_mulai' => 'nullable|date|date_format:Y-m-d|exists:logs,tanggal',
-            'tanggal_selesai' => 'nullable|date|date_format:Y-m-d|exists:logs,tanggal'
+            'tanggal_mulai' => 'nullable|date|date_format:Y-m-d|before:tanggal_selesai',
+            'tanggal_selesai' => 'nullable|date|date_format:Y-m-d|before:tomorrow'
         ], $messages);
 
         if ($validator->fails()) {
@@ -265,10 +266,15 @@ class AdminPageController extends Controller
         $tanggalMulai = $request->tanggal_mulai;
         $tanggalSelesai = $request->tanggal_selesai;
 
-        $users = DetailUser::where('shift_id', $request->shift_id)->get();
+        $users = DetailUser::all();
+
+        if ($request->shift_id) {
+            $users = DetailUser::where('shift_id', $request->shift_id)->get();
+        }
 
         $result = $users->map(function ($user) use ($tanggalMulai, $tanggalSelesai) {
-            $logsQuery = $user->logs();
+            $acc = User::where('username', '=', $user->username)->first();
+            $logsQuery = $acc->logs();
 
             if ($tanggalMulai) {
                 $logsQuery->where('tanggal', '>=', $tanggalMulai);
@@ -282,7 +288,7 @@ class AdminPageController extends Controller
             $tidakHadirCount = $logsQuery->where('kehadiran', 'tidak hadir')->count();
 
             return [
-                'username' => $user->username,
+                'username' => $user->nip,
                 'nama' => $user->nama,
                 'jumlah_hadir' => $hadirCount,
                 'jumlah_izin' => $izinCount,
@@ -290,11 +296,28 @@ class AdminPageController extends Controller
             ];
         });
 
-        return response()->json($result);
+        return response()->json(['success' => true, 'data' => $result]);
     }
 
-    public function getDivisi() {
-        $divisi =  Division::get();
+    public function getDivisions(Request $request) {
+        $messages = [
+            'nama_divisi.string' => 'Nama Divisi berupa string'
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'nama_divisi' => 'nullable|string'
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()]);
+        }
+
+        $divisi =  Division::all();
+
+        if ($request->nama_divisi) {
+            $divisi = Division::where('nama_divisi', 'LIKE', '%' . $request->nama_divisi . '%')
+                ->get();
+        }
 
         $data = $divisi->map(function ($div) {
             $divCount = $div->detailUsers()->count();
@@ -307,6 +330,106 @@ class AdminPageController extends Controller
         return response()->json(['success' => true, 'divisions' => $data]);
     }
 
+    public function getBelumAktif() {
+        $users = DetailUser::where('divisi_id', '=', null)->get();
+
+        return response()->json(['success' => true, 'unactive' => $users]);
+    }
+
+    public function getAnggotaDivisi(Request $request) {
+        $messages = [
+            'nama_divisi.string' => 'Nama Divisi berupa string'
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'nama_divisi' => 'required|string'
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()]);
+        }
+
+        $divisi = Division::where('nama_divisi', '=', $request->nama_divisi)
+            ->select('id')
+            ->first()->id;
+
+        $member = DetailUser::where('divisi_id', '=', $divisi)
+            ->select('nama', 'nip', 'nilai_id')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'member' => $member,
+            'divisi' => $divisi
+        ]);
+    }
+
+    public function postStatus(Request $request) {
+        $messages = [
+            'username.required' => 'Tidak ada username',
+            'status_magang.required' => 'Status diperlukan'
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|array',
+            'status_magang' => 'required|string'
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()]);
+        }
+
+        $users = $request->username;
+        $status = $request->status_magang;
+        $updatedUsers = []; // Array untuk menyimpan username yang berhasil diupdate
+
+        foreach ($users as $user) {
+            $detailUser = DetailUser::where('username', '=', $user)->first();
+
+            if ($detailUser) {
+                $detailUser->status_pegawai = $status;
+                $detailUser->save();
+                $updatedUsers[] = $user; // Tambahkan username ke daftar yang berhasil diupdate
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status berhasil diganti',
+            'updated_users' => $updatedUsers,
+            'status' => $status
+        ]);
+    }
+
+    public function getAllTeam() {
+        $all = DetailUser::select('nama', 'nip', 'status_pegawai')->get();
+        return response()->json(['success' => true, 'allTeam' => $all]);
+    }
+
+    public function getPemagang($username) {
+        $user = User::join('detail_users', 'users.username', '=', 'detail_users.username')
+            ->select(
+                'detail_users.username',
+                'detail_users.nama',
+                'detail_users.asal_sekolah',
+                'detail_users.tempat_lahir',
+                'detail_users.tanggal_lahir',
+                'detail_users.nomor_hp',
+                'detail_users.tanggal_masuk',
+                'detail_users.tanggal_keluar',
+                'detail_users.nip',
+                'detail_users.shift_id',
+                'detail_users.divisi_id',
+                'detail_users.os',
+                'detail_users.browser',
+                'users.status_akun',
+                'users.konfirmasi_admin'
+            )->where('detail_users.username', '=', $username)
+            ->get();
+
+        return response()->json(['success' => true, 'user' => $user]);
+    }
+
     public function groupBySekolah()
     {
         $data = DetailUser::selectRaw('asal_sekolah, COUNT(*) as jumlah_partisipan')
@@ -315,7 +438,7 @@ class AdminPageController extends Controller
 
         return response()->json($data);
     }
-    
+
     public function searchBySekolah(Request $request)
     {
         $keyword = $request->keyword;
@@ -388,7 +511,7 @@ class AdminPageController extends Controller
             'message' => 'id shift tidak ditemukan'
         ], 404);
     }
-    
+
     public function addShift(Request $request)
     {
       $validator = Validator::make($request->all(), [
