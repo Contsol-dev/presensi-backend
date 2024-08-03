@@ -318,6 +318,10 @@ class AdminPageController extends Controller
             $divisi = Division::where('nama_divisi', 'LIKE', '%' . $request->nama_divisi . '%')
                 ->get();
         }
+=======
+    public function getDivisions() {
+        $divisi =  Division::get();
+>>>>>>> Stashed changes
 
         $data = $divisi->map(function ($div) {
             $divCount = $div->detailUsers()->count();
