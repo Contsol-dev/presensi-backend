@@ -21,6 +21,7 @@ return new class extends Migration
             $table->time('pulang')->nullable();
             $table->text('log_activity')->nullable();
             $table->text('kebaikan')->nullable();
+            $table->text('catatan')->nullable();
             $table->boolean('terlambat_masuk')->nullable();
             $table->boolean('istirahat_awal')->nullable();
             $table->boolean('terlambat_kembali')->nullable();

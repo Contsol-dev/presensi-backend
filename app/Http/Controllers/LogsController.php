@@ -12,8 +12,7 @@ use Illuminate\Support\Facades\Validator;
 
 class LogsController extends Controller
 {
-    public function logBaru(Request $request)
-    {
+    public function logBaru(Request $request) {
         $messages = [
             'username.exists' => 'Username tidak ada',
             'tanggal.required' => 'Tanggal wajib diisi'
@@ -36,6 +35,7 @@ class LogsController extends Controller
         $tanggal = $now->format('Y-m-d');
 
         $todayLog = Log::where('tanggal', '=', $tanggal)
+            ->where('username', '=', $request->username)
             ->first();
 
         if ($todayLog) {
@@ -95,6 +95,7 @@ class LogsController extends Controller
 
         if ($log) {
             $log->masuk = $request->masuk;
+            $log->kehadiran = "hadir";
             $log->save();
 
             return response()->json([

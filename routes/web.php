@@ -41,6 +41,28 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/logout', [AuthController::class, 'logout']);
 
+Route::post('/admin/login', [AuthController::class, 'adminLogin']);
+
+Route::post('/admin/register', [AuthController::class, 'adminRegister']);
+
+Route::get('/admin/dashboard', [AdminPageController::class, 'dashboard']);
+
+Route::get('/admin/profile/{admin_id}', [AdminPageController::class, 'profile']);
+
+Route::post('/admin/profile', [AdminPageController::class, 'postProfile']);
+
+Route::post('/admin/presensi/harian', [AdminPageController::class, 'getPresensi']);
+
+// belum testing
+
+Route::post('/admin/detail-presensi', [AdminPageController::class, 'getDetailPresensi']);
+
+Route::post('/admin/detail-presensi/catatan', [AdminPageController::class, 'postCatatan']);
+
+Route::post('/admin/laporan', [AdminPageController::class, 'getLaporan']);
+
+Route::get('/admin/divisi/aktif', [AdminPageController::class, 'getDivisi']);
+
 Route::get('/admin/dashboard', [AdminPageController::class, 'dashboard']);
 
 Route::get('admin/sekolah', [AdminPageController::class, 'groupBySekolah']);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admin;
 use App\Models\DetailUser;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -94,6 +95,77 @@ class AuthController extends Controller
                 'message' => 'login sukses',
                 'username' => $userInfo->username,
                 'nama' => $userInfo->detail->nama
+            ]);
+        } else {
+            Session::flash('error', 'Email atau password salah!');
+            return response()->json(['success' => false, 'message' => 'login gagal']);
+        }
+    }
+
+    public function adminRegister(Request $request) {
+        $messages = [
+            'email.required' => 'Email wajib diisi',
+            'email.unique' => 'Email sudah terdaftar',
+            'password.min' => 'Password minimal 8 karakter',
+            'password.required' => 'Password wajib diisi',
+            'konfirm_password.required' => 'Konfirmasi password wajib diisi',
+            'konfirm_password.min' => 'Konfirmasi password minimal 8 karakter',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:8',
+            'konfirm_password' => 'required|min:8|same:password',
+            'nama' => 'required|string'
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()]);
+        }
+
+        $data = $request->all();
+        if ($data['password'] === $data['konfirm_password']) {
+            $admin = new Admin();
+            $admin->email = $data['email'];
+            $admin->nama= $data['nama'];
+            $admin->password = Hash::make($data['password']);
+            $admin->save();
+
+            return response()->json(['success' => true, 'message' => 'register berhasil']);
+        } else {
+            return response()->json(['success' => false, 'message' => 'password tidak sama']);
+        }
+    }
+
+    public function adminLogin(Request $request) {
+        $messages = [
+            'email.required' => 'Email wajib diisi',
+            'password.required' => 'Password wajib diisi',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'email' => 'required',
+            'password' => 'required'
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()]);
+        }
+
+        $data = [
+            'email' => $request->email,
+            'password' => $request->password
+        ];
+
+        $adminInfo = Admin::where('email', '=', $request->email)
+                    ->first();
+
+        if (Auth::guard('admin')->attempt($data)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'login sukses',
+                'id' => $adminInfo->id,
+                'nama' => $adminInfo->nama
             ]);
         } else {
             Session::flash('error', 'Email atau password salah!');
