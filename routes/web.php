@@ -62,3 +62,39 @@ Route::post('/admin/detail-presensi/catatan', [AdminPageController::class, 'post
 Route::post('/admin/laporan', [AdminPageController::class, 'getLaporan']);
 
 Route::get('/admin/divisi/aktif', [AdminPageController::class, 'getDivisi']);
+
+Route::get('/admin/dashboard', [AdminPageController::class, 'dashboard']);
+
+Route::get('admin/sekolah', [AdminPageController::class, 'groupBySekolah']);
+
+Route::post('admin/sekolah', [AdminPageController::class, 'searchBySekolah']);
+
+Route::get('admin/shift', [AdminPageController::class, 'getShifts']);
+
+Route::post('admin/shift', [AdminPageController::class, 'editShift']);
+
+Route::post('admin/shift/add', [AdminPageController::class, 'addShift']);
+
+Route::get('admin/shift/delete/{id}', [AdminPageController::class, 'deleteShift']);
+
+Route::get('admin/manage-divisi', [AdminPageController::class, 'getDivisi']);
+
+Route::post('admin/manage-divisi', [AdminPageController::class, 'editDivisi']);
+
+Route::post('admin/manage-divisi/add', [AdminPageController::class, 'addDivisi']);
+
+Route::get('admin/manage-divisi/delete/{id}', [AdminPageController::class, 'deleteDivisi']);
+
+Route::get('/admin/manage-penilaian-subkategori/{id}',
+    [AdminPageController::class, 'deleteSubkategori']    
+);
+
+Route::get('/admin/manage-penilaian/{division_id}', [AdminPageController::class, 'getPenilaian']);
+
+Route::post('/admin/manage-penilaian-subkategori', [AdminPageController::class, 'addSubkategori']);
+
+Route::get('/admin/manage-penilaian-kategori/{id}', [AdminPageController::class, 'getKategori']);
+
+Route::post('/admin/manage-penilaian-kategori', [AdminPageController::class, 'addKategori']);
+
+Route::get('/admin/manage-penilaian-kategori/{division_id}/{category_id}', [AdminPageController::class, 'deleteKategori']);
