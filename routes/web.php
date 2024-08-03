@@ -53,15 +53,25 @@ Route::post('/admin/profile', [AdminPageController::class, 'postProfile']);
 
 Route::post('/admin/presensi/harian', [AdminPageController::class, 'getPresensi']);
 
-// belum testing
-
 Route::post('/admin/detail-presensi', [AdminPageController::class, 'getDetailPresensi']);
 
 Route::post('/admin/detail-presensi/catatan', [AdminPageController::class, 'postCatatan']);
 
 Route::post('/admin/laporan', [AdminPageController::class, 'getLaporan']);
 
-Route::get('/admin/divisi/aktif', [AdminPageController::class, 'getDivisi']);
+Route::post('/admin/divisi/aktif', [AdminPageController::class, 'getDivisions']);
+
+Route::post('/admin/divisi', [AdminPageController::class, 'getDivisions']);
+
+Route::get('/admin/divisi/belum-aktif', [AdminPageController::class, 'getBelumAktif']);
+
+Route::post('/admin/divisi/anggota', [AdminPageController::class, 'getAnggotaDivisi']);
+
+Route::post('/admin/divisi/status', [AdminPageController::class, 'postStatus']);
+
+Route::get('/admin/all-team', [AdminPageController::class, 'getAllTeam']);
+
+Route::get('/admin/detail-pemagang/{username}', [AdminPageController::class, 'getPemagang']);
 
 Route::get('/admin/dashboard', [AdminPageController::class, 'dashboard']);
 
@@ -86,7 +96,7 @@ Route::post('admin/manage-divisi/add', [AdminPageController::class, 'addDivisi']
 Route::get('admin/manage-divisi/delete/{id}', [AdminPageController::class, 'deleteDivisi']);
 
 Route::get('/admin/manage-penilaian-subkategori/{id}',
-    [AdminPageController::class, 'deleteSubkategori']    
+    [AdminPageController::class, 'deleteSubkategori']
 );
 
 Route::get('/admin/manage-penilaian/{division_id}', [AdminPageController::class, 'getPenilaian']);

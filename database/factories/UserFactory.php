@@ -19,7 +19,7 @@ class UserFactory extends Factory
             'username' => $this->faker->unique()->userName,
             'email' => $this->faker->unique()->safeEmail,
             'password' => Hash::make('password'), // Password terenkripsi
-            'konfirmasi_email' => $this->faker->boolean,
+            'konfirmasi_admin' => $this->faker->boolean,
             'status_akun' => $this->faker->randomElement(['active', 'inactive']),
             'remember_token' => Str::random(10),
         ];

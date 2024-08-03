@@ -18,7 +18,7 @@ class ShiftsSeeder extends Seeder
             'kembali' => '13:00:00',
             'pulang' => '16:30:00',
         ]);
-        
+
         DB::table('shifts')->insert([
             'nama_shift' => 'Siang',
             'masuk' => '13:30:00',
@@ -32,7 +32,7 @@ class ShiftsSeeder extends Seeder
             'masuk' => '19:00:00',
             'istirahat' => '22:30:00',
             'kembali' => '00:00:00',
-            'pulang' => '3:30:00',
+            'pulang' => '03:30:00',
         ]);
     }
 }
