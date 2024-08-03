@@ -7,6 +7,7 @@ use App\Models\Log;
 use App\Models\User;
 use App\Models\Admin;
 use App\Models\DetailUser;
+use App\Models\Division;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -175,15 +176,130 @@ class AdminPageController extends Controller
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
         }
 
-        $magang = DetailUser::where('username', '=', $request->username)
-            ->select('tanggal_masuk', 'tanggal_keluar')
-            ->first();
+        $magang = DetailUser::join('shifts', 'detail_users.shift_id', '=', 'shifts.id')
+            ->select('detail_users.tanggal_masuk', 'detail_users.tanggal_keluar', 'shifts.masuk', 'shifts.istirahat')
+            ->get();
+
+        $masuk = Log::where('username', '=', $request->username)
+            ->where('kehadiran', '=', 'hadir')
+            ->count();
+        $terlambatMasuk = Log::where('username', '=', $request->username)
+            ->where('terlambat_masuk', '=', true)
+            ->count();
+        $istirahatAwal = Log::where('username', '=', $request->username)
+            ->where('istirahat_awal', '=', true)
+            ->count();
+        $terlambatKembali = Log::where('username', '=', $request->username)
+            ->where('terlambat_kembali', '=', true)
+            ->count();
+        $pulangAwal = Log::where('username', '=', $request->username)
+            ->where('istirahat_awal', '=', true)
+            ->count();
 
         $presensi = Log::where('username', '=', $request->username)
             ->get();
 
-        return response()->json(['success' => true, 'magang' => $magang, 'presensi' => $presensi]);
+        return response()->json([
+            'success' => true,
+            'magang' => $magang,
+            'presensi' => $presensi,
+            'masuk' => $masuk,
+            'terlambatMasuk' => $terlambatMasuk,
+            'istirahatAwal' => $istirahatAwal,
+            'terlambatKembali' => $terlambatKembali,
+            'pulangAwal' => $pulangAwal
+        ]);
+    }
 
-        // TODO : nambahin data shift sama hitung"an jam kerja dll
+    public function postCatatan(Request $request) {
+        $messages = [
+            'tanggal.date' => 'Format tanggal tidak valid',
+            'tanggal.exists' => 'Tanggal tidak ada',
+            'username.required' => 'Username harus ada',
+            'username.string' => 'Username harus berupa string',
+            'username.exists' => 'Username tidak ada/belum terdaftar',
+            'catatan.required' => 'Catatan wajib terisi'
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'tanggal' => 'required|date|date_format:Y-m-d|exists:logs,tanggal',
+            'username' => 'required|string|exists:users,username',
+            'catatan' => 'required|string'
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()]);
+        }
+
+        $log = Log::where('username', '=', $request->username)
+            ->where('tanggal', '=', $request->tanggal)
+            ->first();
+
+        $log->catatan = $request->catatan;
+        $log->save();
+
+        return response()->json(['success' => true, 'message' => 'Catatan berhasil tersimpan']);
+    }
+
+    public function getLaporan(Request $request) {
+        $messages = [
+            'tanggal_mulai.date' => 'Format tanggal tidak valid',
+            'tanggal_mulai.exists' => 'Tanggal tidak ada',
+            'tanggal_selesai.date' => 'Format tanggal tidak valid',
+            'tanggal_selesai.exists' => 'Tanggal tidak ada',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'tanggal_mulai' => 'nullable|date|date_format:Y-m-d|exists:logs,tanggal',
+            'tanggal_selesai' => 'nullable|date|date_format:Y-m-d|exists:logs,tanggal'
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()]);
+        }
+
+        $tanggalMulai = $request->tanggal_mulai;
+        $tanggalSelesai = $request->tanggal_selesai;
+
+        $users = DetailUser::where('shift_id', $request->shift_id)->get();
+
+        $result = $users->map(function ($user) use ($tanggalMulai, $tanggalSelesai) {
+            $logsQuery = $user->logs();
+
+            if ($tanggalMulai) {
+                $logsQuery->where('tanggal', '>=', $tanggalMulai);
+            }
+            if ($tanggalSelesai) {
+                $logsQuery->where('tanggal', '<=', $tanggalSelesai);
+            }
+
+            $hadirCount = $logsQuery->where('kehadiran', 'hadir')->count();
+            $izinCount = $logsQuery->where('kehadiran', 'izin')->count();
+            $tidakHadirCount = $logsQuery->where('kehadiran', 'tidak hadir')->count();
+
+            return [
+                'username' => $user->username,
+                'nama' => $user->nama,
+                'jumlah_hadir' => $hadirCount,
+                'jumlah_izin' => $izinCount,
+                'jumlah_tidak_hadir' => $tidakHadirCount
+            ];
+        });
+
+        return response()->json($result);
+    }
+
+    public function getDivisi() {
+        $divisi =  Division::get();
+
+        $data = $divisi->map(function ($div) {
+            $divCount = $div->detailUsers()->count();
+            return [
+                'nama_divisi' => $div->nama_divisi,
+                'jumlah_anggota' => $divCount
+            ];
+        });
+
+        return response()->json(['success' => true, 'divisions' => $data]);
     }
 }

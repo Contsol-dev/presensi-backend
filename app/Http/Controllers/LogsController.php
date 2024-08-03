@@ -95,7 +95,7 @@ class LogsController extends Controller
 
         if ($log) {
             $log->masuk = $request->masuk;
-            $log->kehadiran = "masuk";
+            $log->kehadiran = "hadir";
             $log->save();
 
             return response()->json([

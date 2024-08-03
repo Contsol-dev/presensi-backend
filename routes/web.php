@@ -52,3 +52,13 @@ Route::get('/admin/profile/{admin_id}', [AdminPageController::class, 'profile'])
 Route::post('/admin/profile', [AdminPageController::class, 'postProfile']);
 
 Route::post('/admin/presensi/harian', [AdminPageController::class, 'getPresensi']);
+
+// belum testing
+
+Route::post('/admin/detail-presensi', [AdminPageController::class, 'getDetailPresensi']);
+
+Route::post('/admin/detail-presensi/catatan', [AdminPageController::class, 'postCatatan']);
+
+Route::post('/admin/laporan', [AdminPageController::class, 'getLaporan']);
+
+Route::get('/admin/divisi/aktif', [AdminPageController::class, 'getDivisi']);
