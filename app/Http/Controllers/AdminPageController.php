@@ -318,10 +318,6 @@ class AdminPageController extends Controller
             $divisi = Division::where('nama_divisi', 'LIKE', '%' . $request->nama_divisi . '%')
                 ->get();
         }
-=======
-    public function getDivisions() {
-        $divisi =  Division::get();
->>>>>>> Stashed changes
 
         $data = $divisi->map(function ($div) {
             $divCount = $div->detailUsers()->count();
@@ -456,7 +452,7 @@ class AdminPageController extends Controller
 
     public function getShifts()
     {
-      $data = Shift::all();
+      $data = Shift::orderBy('masuk', 'asc')->get();
 
       return response()->json([
           'success' => true,
@@ -468,7 +464,7 @@ class AdminPageController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required|exists:shifts,id',
-            'nama_baru' => 'required|string|max:255',
+            'nama_shift' => 'required|string|max:255',
             'masuk' => 'required|date_format:H:i:s',
             'istirahat' => 'required|date_format:H:i:s',
             'kembali' => 'required|date_format:H:i:s',
@@ -484,11 +480,11 @@ class AdminPageController extends Controller
 
         // Ambil data dari request
         $id = $request->id;
-        $nama_baru = $request->nama_baru;
-        $jam_masuk = $request->masuk;
-        $jam_istirahat = $request->istirahat;
-        $jam_kembali = $request->kembali;
-        $jam_pulang = $request->pulang;
+        $nama_shift = $request->nama_shift;
+        $masuk = $request->masuk;
+        $istirahat = $request->istirahat;
+        $kembali = $request->kembali;
+        $pulang = $request->pulang;
 
         // Cari shift berdasarkan ID
         $shift = Shift::find($id);
@@ -496,11 +492,11 @@ class AdminPageController extends Controller
         if ($shift) {
             // Update data shift
             $shift->update([
-                'nama_shift' => $nama_baru,
-                'jam_masuk' => $jam_masuk,
-                'jam_istirahat' => $jam_istirahat,
-                'jam_kembali' => $jam_kembali,
-                'jam_pulang' => $jam_pulang,
+                'nama_shift' => $nama_shift,
+                'masuk' => $masuk,
+                'istirahat' => $istirahat,
+                'kembali' => $kembali,
+                'pulang' => $pulang,
             ]);
 
             return response()->json([
@@ -519,7 +515,7 @@ class AdminPageController extends Controller
     public function addShift(Request $request)
     {
       $validator = Validator::make($request->all(), [
-          'nama_baru' => 'required|string|max:255',
+          'nama_shift' => 'required|string|max:255',
           'masuk' => 'required|date_format:H:i:s',
           'istirahat' => 'required|date_format:H:i:s',
           'kembali' => 'required|date_format:H:i:s',
@@ -533,7 +529,7 @@ class AdminPageController extends Controller
           ], 422);
       }
 
-      $nama_baru = $request->nama_baru;
+      $nama_baru = $request->nama_shift;
       $masuk = $request->masuk;
       $istirahat = $request->istirahat;
       $kembali = $request->kembali;
@@ -587,7 +583,7 @@ class AdminPageController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required|exists:divisions,id',
-            'nama_baru' => 'required|string|max:255'
+            'nama_divisi' => 'required|string|max:255'
         ]);
 
         if ($validator->fails()) {
@@ -598,7 +594,7 @@ class AdminPageController extends Controller
         }
 
         $id = $request->id;
-        $nama_baru = $request->nama_baru;
+        $nama_baru = $request->nama_divisi;
 
         $division = Division::find($id);
 
