@@ -20,7 +20,7 @@ class AdminPageController extends Controller
 {
     public function dashboard()
     {
-      $pemagang = DetailUser::whereNull('tanggal_keluar')->count();
+      $pemagang = DetailUser::where('status_pegawai', '=', 'magang')->count();
       $alumni = DetailUser::whereNotNull('tanggal_keluar')->count();
       $hadir = Log::where('kehadiran', 'hadir')->whereDate('tanggal', Carbon::today())->count();
       $izin = Log::where('kehadiran', 'izin')->whereDate('tanggal', Carbon::today())->count();
@@ -40,6 +40,9 @@ class AdminPageController extends Controller
             ->first();
 
         if ($profile) {
+            if ($profile->photo) {
+                $profile->photo = url($profile->photo);
+            }
             return response()->json(['success' => true, 'profile' => $profile], 200);
         } else {
             return response()->json(['success' => false, 'message' => 'Profil tidak ditemukan'], 404);
@@ -120,14 +123,14 @@ class AdminPageController extends Controller
         }
 
         $presensi = Log::join('detail_users', 'logs.username', '=', 'detail_users.username')
-                ->select('detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
+                ->select('detail_users.username', 'detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
                 ->where('logs.tanggal', '=', $tanggal)
                 ->get();
 
         if ($request->filter) {
             $filter = $request->filter;
             $presensi = Log::join('detail_users', 'logs.username', '=', 'detail_users.username')
-                ->select('detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
+                ->select('detail_users.username', 'detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
                 ->where('logs.tanggal', '=', $tanggal)
                 ->where('logs.kehadiran', '=', $filter)
                 ->get();
@@ -135,14 +138,14 @@ class AdminPageController extends Controller
 
         if ($request->nama) {
             $presensi = Log::join('detail_users', 'logs.username', '=', 'detail_users.username')
-                ->select('detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
+                ->select('detail_users.username', 'detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
                 ->where('logs.tanggal', '=', $tanggal)
                 ->where('detail_users.nama', 'LIKE', '%' . $request->nama . '%')
                 ->get();
             if ($request->filter) {
                 $filter = $request->filter;
                 $presensi = Log::join('detail_users', 'logs.username', '=', 'detail_users.username')
-                    ->select('detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
+                    ->select('detail_users.username', 'detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
                     ->where('logs.tanggal', '=', $tanggal)
                     ->where('logs.kehadiran', '=', $filter)
                     ->where('detail_users.nama', 'LIKE', '%' . $request->nama . '%')
@@ -182,8 +185,8 @@ class AdminPageController extends Controller
 
         $magang = DetailUser::join('shifts', 'detail_users.shift_id', '=', 'shifts.id')
             ->where('detail_users.username', '=', $request->username)
-            ->select('detail_users.tanggal_masuk', 'detail_users.tanggal_keluar', 'shifts.masuk', 'shifts.istirahat')
-            ->get();
+            ->select('detail_users.nama', 'detail_users.nip', 'detail_users.tanggal_masuk', 'detail_users.tanggal_keluar', 'shifts.masuk', 'shifts.pulang')
+            ->first();
 
         $masuk = Log::where('username', '=', $request->username)
             ->where('kehadiran', '=', 'hadir')
@@ -202,7 +205,15 @@ class AdminPageController extends Controller
             ->count();
 
         $presensi = Log::where('username', '=', $request->username)
+            ->select('tanggal', 'masuk', 'istirahat', 'kembali', 'pulang', 'log_activity', 'kebaikan', 'catatan', 'kehadiran')
             ->get();
+
+        if ($request->filter) {
+            $presensi = Log::where('username', '=', $request->username)
+            ->where('kehadiran', '=', $request->filter)
+            ->select('tanggal', 'masuk', 'istirahat', 'kembali', 'pulang', 'log_activity', 'kebaikan', 'catatan', 'kehadiran')
+            ->get();
+        }
 
         return response()->json([
             'success' => true,
