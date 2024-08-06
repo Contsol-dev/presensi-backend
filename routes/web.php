@@ -73,6 +73,10 @@ Route::get('/admin/all-team', [AdminPageController::class, 'getAllTeam']);
 
 Route::get('/admin/detail-pemagang/{username}', [AdminPageController::class, 'getPemagang']);
 
+Route::post('/admin/pemagang/nilai', [AdminPageController::class, 'postPenilaian']);
+
+Route::post('/admin/detail-pemagang', [AdminPageController::class, 'postPemagang']);
+
 Route::get('/admin/dashboard', [AdminPageController::class, 'dashboard']);
 
 Route::get('admin/sekolah', [AdminPageController::class, 'groupBySekolah']);
@@ -112,3 +116,5 @@ Route::get('/admin/manage-penilaian-kategori/{id}', [AdminPageController::class,
 Route::post('/admin/manage-penilaian-kategori', [AdminPageController::class, 'addKategori']);
 
 Route::get('/admin/manage-penilaian-kategori/{division_id}/{category_id}', [AdminPageController::class, 'deleteKategori']);
+
+Route::get('/admin/penilaian/{username}', [AdminPageController::class, 'getPenilaianUser']);

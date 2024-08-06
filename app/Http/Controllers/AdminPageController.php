@@ -13,14 +13,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\NilaiCategory;
 use App\Models\NilaiSubcategory;
+use App\Models\NilaiUser;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
+
+use function Laravel\Prompts\password;
 
 class AdminPageController extends Controller
 {
     public function dashboard()
     {
-      $pemagang = DetailUser::whereNull('tanggal_keluar')->count();
+      $pemagang = DetailUser::where('status_pegawai', '=', 'magang')->count();
       $alumni = DetailUser::whereNotNull('tanggal_keluar')->count();
       $hadir = Log::where('kehadiran', 'hadir')->whereDate('tanggal', Carbon::today())->count();
       $izin = Log::where('kehadiran', 'izin')->whereDate('tanggal', Carbon::today())->count();
@@ -40,6 +43,9 @@ class AdminPageController extends Controller
             ->first();
 
         if ($profile) {
+            if ($profile->photo) {
+                $profile->photo = url($profile->photo);
+            }
             return response()->json(['success' => true, 'profile' => $profile], 200);
         } else {
             return response()->json(['success' => false, 'message' => 'Profil tidak ditemukan'], 404);
@@ -120,14 +126,14 @@ class AdminPageController extends Controller
         }
 
         $presensi = Log::join('detail_users', 'logs.username', '=', 'detail_users.username')
-                ->select('detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
+                ->select('detail_users.username', 'detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
                 ->where('logs.tanggal', '=', $tanggal)
                 ->get();
 
         if ($request->filter) {
             $filter = $request->filter;
             $presensi = Log::join('detail_users', 'logs.username', '=', 'detail_users.username')
-                ->select('detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
+                ->select('detail_users.username', 'detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
                 ->where('logs.tanggal', '=', $tanggal)
                 ->where('logs.kehadiran', '=', $filter)
                 ->get();
@@ -135,14 +141,14 @@ class AdminPageController extends Controller
 
         if ($request->nama) {
             $presensi = Log::join('detail_users', 'logs.username', '=', 'detail_users.username')
-                ->select('detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
+                ->select('detail_users.username', 'detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
                 ->where('logs.tanggal', '=', $tanggal)
                 ->where('detail_users.nama', 'LIKE', '%' . $request->nama . '%')
                 ->get();
             if ($request->filter) {
                 $filter = $request->filter;
                 $presensi = Log::join('detail_users', 'logs.username', '=', 'detail_users.username')
-                    ->select('detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
+                    ->select('detail_users.username', 'detail_users.nama', 'logs.masuk', 'logs.pulang', 'logs.istirahat', 'logs.kembali', 'logs.log_activity', 'logs.kebaikan', 'logs.kehadiran')
                     ->where('logs.tanggal', '=', $tanggal)
                     ->where('logs.kehadiran', '=', $filter)
                     ->where('detail_users.nama', 'LIKE', '%' . $request->nama . '%')
@@ -182,8 +188,8 @@ class AdminPageController extends Controller
 
         $magang = DetailUser::join('shifts', 'detail_users.shift_id', '=', 'shifts.id')
             ->where('detail_users.username', '=', $request->username)
-            ->select('detail_users.tanggal_masuk', 'detail_users.tanggal_keluar', 'shifts.masuk', 'shifts.istirahat')
-            ->get();
+            ->select('detail_users.nama', 'detail_users.nip', 'detail_users.tanggal_masuk', 'detail_users.tanggal_keluar', 'shifts.masuk', 'shifts.pulang')
+            ->first();
 
         $masuk = Log::where('username', '=', $request->username)
             ->where('kehadiran', '=', 'hadir')
@@ -202,7 +208,15 @@ class AdminPageController extends Controller
             ->count();
 
         $presensi = Log::where('username', '=', $request->username)
+            ->select('tanggal', 'masuk', 'istirahat', 'kembali', 'pulang', 'log_activity', 'kebaikan', 'catatan', 'kehadiran')
             ->get();
+
+        if ($request->filter) {
+            $presensi = Log::where('username', '=', $request->username)
+            ->where('kehadiran', 'LIKE', '%' . $request->filter . '%')
+            ->select('tanggal', 'masuk', 'istirahat', 'kembali', 'pulang', 'log_activity', 'kebaikan', 'catatan', 'kehadiran')
+            ->get();
+        }
 
         return response()->json([
             'success' => true,
@@ -263,29 +277,44 @@ class AdminPageController extends Controller
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
         }
 
-        $tanggalMulai = $request->tanggal_mulai;
-        $tanggalSelesai = $request->tanggal_selesai;
+        $tanggalMulai = Carbon::today()->format('Y-m-d');
+        if ($request->tanggal_mulai) {
+            $tanggalMulai = $request->tanggal_mulai;
+        }
+        $tanggalSelesai = Carbon::today()->subMonth()->format('Y-m-d');
+        if ($request->tanggal_selesai) {
+            $tanggalSelesai = $request->tanggal_selesai;
+        }
 
         $users = DetailUser::all();
 
         if ($request->shift_id) {
             $users = DetailUser::where('shift_id', $request->shift_id)->get();
+            if ($request->filter) {
+                $users = DetailUser::where('nama', 'LIKE', '%' . $request->filter . '%')->where('shift_id', $request->shift_id)->get();
+            }
+        }
+
+        if ($request->filter) {
+            $users = DetailUser::where('nama', 'LIKE', '%' . $request->filter . '%')->get();
         }
 
         $result = $users->map(function ($user) use ($tanggalMulai, $tanggalSelesai) {
-            $acc = User::where('username', '=', $user->username)->first();
-            $logsQuery = $acc->logs();
-
-            if ($tanggalMulai) {
-                $logsQuery->where('tanggal', '>=', $tanggalMulai);
-            }
-            if ($tanggalSelesai) {
-                $logsQuery->where('tanggal', '<=', $tanggalSelesai);
-            }
-
-            $hadirCount = $logsQuery->where('kehadiran', 'hadir')->count();
-            $izinCount = $logsQuery->where('kehadiran', 'izin')->count();
-            $tidakHadirCount = $logsQuery->where('kehadiran', 'tidak hadir')->count();
+            $hadirCount = Log::where('username', '=', $user->username)
+                ->where('tanggal', '>=', $tanggalMulai)
+                ->where('tanggal', '<=', $tanggalSelesai)
+                ->where('kehadiran', '=', 'hadir')
+                ->count();
+            $tidakHadirCount = Log::where('username', '=', $user->username)
+                ->where('tanggal', '>=', $tanggalMulai)
+                ->where('tanggal', '<=', $tanggalSelesai)
+                ->where('kehadiran', '=', 'tidak hadir')
+                ->count();
+            $izinCount = Log::where('username', '=', $user->username)
+                ->where('tanggal', '>=', $tanggalMulai)
+                ->where('tanggal', '<=', $tanggalSelesai)
+                ->where('kehadiran', '=', 'izin')
+                ->count();
 
             return [
                 'username' => $user->nip,
@@ -320,8 +349,9 @@ class AdminPageController extends Controller
         }
 
         $data = $divisi->map(function ($div) {
-            $divCount = $div->detailUsers()->count();
+            $divCount = DetailUser::where('divisi_id', $div->id)->count();
             return [
+                'id' => $div->id,
                 'nama_divisi' => $div->nama_divisi,
                 'jumlah_anggota' => $divCount
             ];
@@ -354,7 +384,7 @@ class AdminPageController extends Controller
             ->first()->id;
 
         $member = DetailUser::where('divisi_id', '=', $divisi)
-            ->select('nama', 'nip', 'nilai_id')
+            ->select('username', 'nama', 'nip', 'nilai_id', 'divisi_id')
             ->get();
 
         return response()->json([
@@ -402,8 +432,8 @@ class AdminPageController extends Controller
     }
 
     public function getAllTeam() {
-        $all = DetailUser::select('nama', 'nip', 'status_pegawai')->get();
-        return response()->json(['success' => true, 'allTeam' => $all]);
+        $all = DetailUser::select('username', 'nama', 'nip', 'nilai_id', 'divisi_id')->get();
+        return response()->json(['success' => true, 'member' => $all]);
     }
 
     public function getPemagang($username) {
@@ -423,11 +453,142 @@ class AdminPageController extends Controller
                 'detail_users.os',
                 'detail_users.browser',
                 'users.status_akun',
-                'users.konfirmasi_admin'
+                'users.konfirmasi_admin',
+                'users.email'
             )->where('detail_users.username', '=', $username)
-            ->get();
+            ->first();
 
         return response()->json(['success' => true, 'user' => $user]);
+    }
+
+    public function postPemagang(Request $request) {
+        $messages = [
+            'username.required' => 'Username wajib diisi',
+            'username.exists' => 'Username tidak ada',
+            'password.min' => 'Password harus memiliki minimal 8 karakter.',
+            'confPassword.same' => 'Konfirmasi Password harus sama dengan Password.',
+            'tanggal_masuk.required' => 'Tanggal masuk wajib diisi.',
+            'tanggal_masuk.date' => 'Tanggal masuk harus berupa tanggal yang valid.',
+            'tanggal_masuk.date_format' => 'Format tanggal masuk harus Y-m-d.',
+            'tanggal_keluar.date' => 'Tanggal keluar harus berupa tanggal yang valid.',
+            'tanggal_keluar.date_format' => 'Format tanggal keluar harus Y-m-d.',
+            'tanggal_keluar.after' => 'Tanggal keluar harus setelah tanggal mulai.',
+            'nip.string' => 'NIP harus berupa string.',
+            'divisi_id.exists' => 'Divisi yang dipilih tidak valid.',
+            'shift_id.exists' => 'Shift yang dipilih tidak valid.',
+            'os.string' => 'OS harus berupa string.',
+            'browser.string' => 'Browser harus berupa string.',
+            'status_akun.string' => 'Status akun harus berupa string.',
+            'konfirmasi_admin.string' => 'Konfirmasi admin harus berupa string.',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|exists:users,username',
+            'password' => 'nullable|string|min:8',
+            'confPassword' => 'nullable|string|same:password',
+            'tanggal_masuk' => 'required|date|date_format:Y-m-d',
+            'tanggal_keluar' => 'nullable|date|date_format:Y-m-d|after:tanggal_mulai',
+            'nip' => 'nullable|string',
+            'divisi_id' => 'nullable|exists:divisions,id',
+            'shift_id' => 'nullable|exists:shifts,id',
+            'os' => 'nullable|string',
+            'browser' => 'nullable|string',
+            'status_akun' => 'nullable|string',
+            'konfirmasi_admin' => 'nullable|boolean',
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()]);
+        }
+
+        $user = User::where('username', $request->username)->first();
+        $detailUser = DetailUser::where('username', $request->username)->first();
+
+        $detailUser->tanggal_masuk = $request->tanggal_masuk;
+
+        if ($request->password && $request->password != "") {
+            $user->password = $request->password;
+        }
+        if ($request->tanggal_keluar) {
+            $detailUser->tanggal_keluar = $request->tanggal_keluar;
+        }
+        if ($request->nip) {
+            $detailUser->nip = $request->nip;
+        }
+        if ($request->divisi_id) {
+            $detailUser->divisi_id = $request->divisi_id;
+        }
+        if ($request->shift_id) {
+            $detailUser->shift_id = $request->shift_id;
+        }
+        if ($request->os) {
+            $detailUser->os = $request->os;
+        }
+        if ($request->browser) {
+            $detailUser->browser = $request->browser;
+        }
+        if ($request->status_akun) {
+            $user->status_akun = $request->status_akun;
+        }
+        if ($request->konfirmasi_admin) {
+            $user->konfirmasi_admin = $request->konfirmasi_admin;
+        }
+
+        $user->save();
+        $detailUser->save();
+
+        return response()->json(['success' => true, 'message' => 'Sukses']);
+    }
+
+    public function postPenilaian(Request $request) {
+        $messages = [
+            'username.required' => 'Username harus diisi.',
+            'username.string' => 'Username harus berupa string.',
+            'penilaian.required' => 'Data penilaian harus diisi.',
+            'penilaian.array' => 'Data penilaian harus berupa array.',
+            'penilaian.*.kategori.id.required' => 'ID kategori harus diisi.',
+            'penilaian.*.kategori.id.integer' => 'ID kategori harus berupa integer.',
+            'penilaian.*.kategori.sub_kategori.required' => 'Sub kategori harus diisi.',
+            'penilaian.*.kategori.sub_kategori.array' => 'Sub kategori harus berupa array.',
+            'penilaian.*.kategori.sub_kategori.*.id.required' => 'ID sub kategori harus diisi.',
+            'penilaian.*.kategori.sub_kategori.*.id.integer' => 'ID sub kategori harus berupa integer.',
+            'penilaian.*.kategori.sub_kategori.*.nilai.required' => 'Nilai harus diisi.',
+            'penilaian.*.kategori.sub_kategori.*.nilai.integer' => 'Nilai harus berupa integer.',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|string',
+            'penilaian' => 'required|array',
+            'penilaian.*.kategori.id' => 'required|integer',
+            'penilaian.*.kategori.sub_kategori' => 'required|array',
+            'penilaian.*.kategori.sub_kategori.*.id' => 'required|integer',
+            'penilaian.*.kategori.sub_kategori.*.nilai' => 'required|integer',
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()]);
+        }
+
+        $data = $request->all();
+
+        foreach ($data['penilaian'] as $kategori) {
+            $kategoriModel = NilaiCategory::where('id', $kategori['kategori']['id'])->first();
+            if ($kategoriModel) {
+                foreach ($kategori['kategori']['sub_kategori'] as $sub) {
+                    $subKategoriModel = NilaiSubcategory::where('id', $sub['id'])->first();
+                    if ($subKategoriModel) {
+                        $penilaian = new NilaiUser();
+                        $penilaian->username = $data['username'];
+                        $penilaian->category_id = $kategoriModel->id;
+                        $penilaian->subcategory_id = $subKategoriModel->id;
+                        $penilaian->nilai = $sub['nilai'];
+                        $penilaian->save();
+                    }
+                }
+            }
+        }
+
+        return response()->json(['message' => 'Penilaian saved successfully!'], 201);
     }
 
     public function groupBySekolah()
@@ -780,6 +941,51 @@ class AdminPageController extends Controller
         return response()->json([
             'penilaian' => $data,
         ], 200);
+    }
+
+    public function getPenilaianUser($username)
+    {
+        // Ambil detail user
+        $user = DetailUser::where('username', $username)->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        // Ambil data penilaian berdasarkan username
+        $penilaian = NilaiUser::where('username', $username)
+            ->with('category', 'subcategory') // Pastikan relasi ini didefinisikan di model
+            ->get()
+            ->groupBy('category_id');
+
+        // Struktur data yang diinginkan
+        $result = [
+            'username' => $user->nama,
+            'nip' => $user->nip,
+            'penilaian' => []
+        ];
+
+        foreach ($penilaian as $kategori_id => $nilaiItems) {
+            $kategori = NilaiCategory::find($kategori_id);
+            if ($kategori) {
+                $result['penilaian'][] = [
+                    'kategori' => [
+                        'id' => $kategori->id,
+                        'nama_kategori' => $kategori->nama_kategori,
+                        'sub_kategori' => $nilaiItems->map(function ($item) {
+                            $subKategori = NilaiSubcategory::find($item->subcategory_id);
+                            return [
+                                'id' => $subKategori->id,
+                                'nama' => $subKategori->nama_subkategori,
+                                'nilai' => $item->nilai
+                            ];
+                        })->toArray()
+                    ]
+                ];
+            }
+        }
+
+        return response()->json($result);
     }
 
     public function getKategori($id)
