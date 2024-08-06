@@ -73,6 +73,8 @@ Route::get('/admin/all-team', [AdminPageController::class, 'getAllTeam']);
 
 Route::get('/admin/detail-pemagang/{username}', [AdminPageController::class, 'getPemagang']);
 
+Route::post('/admin/detail-pemagang', [AdminPageController::class, 'postPemagang']);
+
 Route::get('/admin/dashboard', [AdminPageController::class, 'dashboard']);
 
 Route::get('admin/sekolah', [AdminPageController::class, 'groupBySekolah']);
