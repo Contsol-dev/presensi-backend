@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\NilaiCategory;
 use App\Models\NilaiSubcategory;
+use App\Models\NilaiUser;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 
@@ -431,8 +432,8 @@ class AdminPageController extends Controller
     }
 
     public function getAllTeam() {
-        $all = DetailUser::select('nama', 'nip', 'status_pegawai')->get();
-        return response()->json(['success' => true, 'allTeam' => $all]);
+        $all = DetailUser::select('username', 'nama', 'nip', 'nilai_id', 'divisi_id')->get();
+        return response()->json(['success' => true, 'member' => $all]);
     }
 
     public function getPemagang($username) {
@@ -537,6 +538,57 @@ class AdminPageController extends Controller
         $detailUser->save();
 
         return response()->json(['success' => true, 'message' => 'Sukses']);
+    }
+
+    public function postPenilaian(Request $request) {
+        $messages = [
+            'username.required' => 'Username harus diisi.',
+            'username.string' => 'Username harus berupa string.',
+            'penilaian.required' => 'Data penilaian harus diisi.',
+            'penilaian.array' => 'Data penilaian harus berupa array.',
+            'penilaian.*.kategori.id.required' => 'ID kategori harus diisi.',
+            'penilaian.*.kategori.id.integer' => 'ID kategori harus berupa integer.',
+            'penilaian.*.kategori.sub_kategori.required' => 'Sub kategori harus diisi.',
+            'penilaian.*.kategori.sub_kategori.array' => 'Sub kategori harus berupa array.',
+            'penilaian.*.kategori.sub_kategori.*.id.required' => 'ID sub kategori harus diisi.',
+            'penilaian.*.kategori.sub_kategori.*.id.integer' => 'ID sub kategori harus berupa integer.',
+            'penilaian.*.kategori.sub_kategori.*.nilai.required' => 'Nilai harus diisi.',
+            'penilaian.*.kategori.sub_kategori.*.nilai.integer' => 'Nilai harus berupa integer.',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|string',
+            'penilaian' => 'required|array',
+            'penilaian.*.kategori.id' => 'required|integer',
+            'penilaian.*.kategori.sub_kategori' => 'required|array',
+            'penilaian.*.kategori.sub_kategori.*.id' => 'required|integer',
+            'penilaian.*.kategori.sub_kategori.*.nilai' => 'required|integer',
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()]);
+        }
+
+        $data = $request->all();
+
+        foreach ($data['penilaian'] as $kategori) {
+            $kategoriModel = NilaiCategory::where('id', $kategori['kategori']['id'])->first();
+            if ($kategoriModel) {
+                foreach ($kategori['kategori']['sub_kategori'] as $sub) {
+                    $subKategoriModel = NilaiSubcategory::where('id', $sub['id'])->first();
+                    if ($subKategoriModel) {
+                        $penilaian = new NilaiUser();
+                        $penilaian->username = $data['username'];
+                        $penilaian->category_id = $kategoriModel->id;
+                        $penilaian->subcategory_id = $subKategoriModel->id;
+                        $penilaian->nilai = $sub['nilai'];
+                        $penilaian->save();
+                    }
+                }
+            }
+        }
+
+        return response()->json(['message' => 'Penilaian saved successfully!'], 201);
     }
 
     public function groupBySekolah()
@@ -854,6 +906,51 @@ class AdminPageController extends Controller
         return response()->json([
             'penilaian' => $data,
         ], 200);
+    }
+
+    public function getPenilaianUser($username)
+    {
+        // Ambil detail user
+        $user = DetailUser::where('username', $username)->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        // Ambil data penilaian berdasarkan username
+        $penilaian = NilaiUser::where('username', $username)
+            ->with('category', 'subcategory') // Pastikan relasi ini didefinisikan di model
+            ->get()
+            ->groupBy('category_id');
+
+        // Struktur data yang diinginkan
+        $result = [
+            'username' => $user->nama,
+            'nip' => $user->nip,
+            'penilaian' => []
+        ];
+
+        foreach ($penilaian as $kategori_id => $nilaiItems) {
+            $kategori = NilaiCategory::find($kategori_id);
+            if ($kategori) {
+                $result['penilaian'][] = [
+                    'kategori' => [
+                        'id' => $kategori->id,
+                        'nama_kategori' => $kategori->nama_kategori,
+                        'sub_kategori' => $nilaiItems->map(function ($item) {
+                            $subKategori = NilaiSubcategory::find($item->subcategory_id);
+                            return [
+                                'id' => $subKategori->id,
+                                'nama' => $subKategori->nama_subkategori,
+                                'nilai' => $item->nilai
+                            ];
+                        })->toArray()
+                    ]
+                ];
+            }
+        }
+
+        return response()->json($result);
     }
 
     public function getKategori($id)
