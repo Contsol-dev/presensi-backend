@@ -99,6 +99,8 @@ Route::post('admin/manage-divisi/add', [AdminPageController::class, 'addDivisi']
 
 Route::get('admin/manage-divisi/delete/{id}', [AdminPageController::class, 'deleteDivisi']);
 
+Route::get('admin/manage-divisi/get/{division_id}', [AdminPageController::class, 'getSpecificDivisi']);
+
 Route::get('/admin/manage-penilaian-subkategori/{id}',
     [AdminPageController::class, 'deleteSubkategori']
 );
