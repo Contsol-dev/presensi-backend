@@ -213,7 +213,7 @@ class AdminPageController extends Controller
 
         if ($request->filter) {
             $presensi = Log::where('username', '=', $request->username)
-            ->where('kehadiran', '=', $request->filter)
+            ->where('kehadiran', 'LIKE', '%' . $request->filter . '%')
             ->select('tanggal', 'masuk', 'istirahat', 'kembali', 'pulang', 'log_activity', 'kebaikan', 'catatan', 'kehadiran')
             ->get();
         }
