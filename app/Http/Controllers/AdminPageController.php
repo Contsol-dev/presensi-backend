@@ -775,6 +775,16 @@ class AdminPageController extends Controller
       ], 200);
     }
 
+    public function getSpecificDivisi($division_id)
+    {
+        $data = Division::where('id', $division_id)->first();
+
+        return response()->json([
+            'success' => true,
+            'data' => $data->nama_divisi
+        ], 200);
+    }
+
     public function editDivisi(Request $request)
     {
         $validator = Validator::make($request->all(), [
