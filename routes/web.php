@@ -79,6 +79,10 @@ Route::get('admin/sekolah', [AdminPageController::class, 'groupBySekolah']);
 
 Route::post('admin/sekolah', [AdminPageController::class, 'searchBySekolah']);
 
+Route::get('admin/sekolah/pemagang/{kampus}', [AdminPageController::class, 'getPemagangByKampus']);
+
+Route::get('admin/sekolah/pemagang/{kampus}/{nama}', [AdminPageController::class, 'getPemagangByKampusAndPemagang']);
+
 Route::get('admin/shift', [AdminPageController::class, 'getShifts']);
 
 Route::post('admin/shift', [AdminPageController::class, 'editShift']);

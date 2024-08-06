@@ -449,6 +449,41 @@ class AdminPageController extends Controller
 
         return response()->json($data);
     }
+    
+    public function getPemagangByKampus($kampus)
+    {
+        $data = DetailUser::with(['shift', 'division'])
+                        ->where('asal_sekolah', 'like', "%{$kampus}%")
+                        ->get()
+                        ->map(function ($user) {
+                            return [
+                                'username' => $user->username,
+                                'nama' => $user->nama,
+                                'nama_divisi' => $user->division->nama_divisi ?? null,
+                                'nama_shift' => $user->shift->nama_shift ?? null,
+                            ];
+                        });
+
+        return response()->json($data);
+    }
+    
+    public function getPemagangByKampusAndPemagang($kampus, $nama)
+    {
+        $data = DetailUser::with(['shift', 'division'])
+                        ->where('asal_sekolah', 'like', "%{$kampus}%")
+                        ->where('nama', 'like', "%{$nama}%")
+                        ->get()
+                        ->map(function ($user) {
+                            return [
+                                'username' => $user->username,
+                                'nama' => $user->nama,
+                                'nama_divisi' => $user->division->nama_divisi ?? null,
+                                'nama_shift' => $user->shift->nama_shift ?? null,
+                            ];
+                        });
+
+        return response()->json($data);
+    }
 
     public function getShifts()
     {
