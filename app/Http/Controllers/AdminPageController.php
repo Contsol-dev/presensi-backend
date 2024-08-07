@@ -317,7 +317,8 @@ class AdminPageController extends Controller
                 ->count();
 
             return [
-                'username' => $user->nip,
+                'username' => $user->username,
+                'nip' => $user->nip,
                 'nama' => $user->nama,
                 'jumlah_hadir' => $hadirCount,
                 'jumlah_izin' => $izinCount,
@@ -614,6 +615,16 @@ class AdminPageController extends Controller
     public function getShifts()
     {
       $data = Shift::all();
+
+      return response()->json([
+          'success' => true,
+          'data' => $data
+      ], 200);
+    }
+
+    public function getShift($shift_id)
+    {
+      $data = Shift::where('id', $shift_id)->first();
 
       return response()->json([
           'success' => true,

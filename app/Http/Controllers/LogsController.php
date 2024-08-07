@@ -315,4 +315,38 @@ class LogsController extends Controller
             ], 404);
         }
     }
+
+    public function editKehadiran(Request $request) {
+        $messages = [
+            'username.exists' => 'User tidak ada',
+            'tanggal.exists' => 'Log hari ini belum ada',
+        ];
+
+        $validator = Validator::make([
+            'username' => 'required|exists:logs,username',
+            'tanggal' => 'required|date|exists:logs,tanggal',
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()]);
+        }
+
+        $log = Log::where('username', $request->username)
+                    ->where('tanggal', $request->tanggal)
+                    ->first();
+
+                    $log->kehadiran = $request->kehadiran;
+                    $log->save();
+
+                    return response()->json([
+                        'message' => 'Sukses update kehadiran'
+                    ], 200);
+    }
+
+    public function editLog(Request $request) {
+        $log = Log::where('id', $request->id)->first();
+        $log->log_activity = $request->log_activity;
+        $log->save();
+        return response()->json(['success' => true, 'message' => 'Log berhasil diubah']);
+    }
 }
