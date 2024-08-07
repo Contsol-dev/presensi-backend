@@ -89,6 +89,12 @@ Route::get('admin/sekolah/pemagang/{kampus}/{nama}', [AdminPageController::class
 
 Route::get('admin/shift', [AdminPageController::class, 'getShifts']);
 
+Route::get('/shift/{shift_id}', [AdminPageController::class, 'getShift']);
+
+Route::post('/log/edit', [LogsController::class, 'editLog']);
+
+Route::post('/log/kehadiran', [LogsController::class, 'editKehadiran']);
+
 Route::post('admin/shift', [AdminPageController::class, 'editShift']);
 
 Route::post('admin/shift/add', [AdminPageController::class, 'addShift']);
