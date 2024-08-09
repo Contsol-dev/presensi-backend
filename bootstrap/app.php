@@ -13,6 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->validateCsrfTokens(except: [
             '/*'
+        ])->alias([
+            'allowIP' => \App\Http\Middleware\AllowIpMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
