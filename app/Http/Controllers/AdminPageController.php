@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\Log;
 use App\Models\User;
 use App\Models\Admin;
+use App\Models\AlumniFiles;
 use App\Models\Shift;
 use App\Models\DetailUser;
 use App\Models\Division;
@@ -438,7 +439,8 @@ class AdminPageController extends Controller
     }
 
     public function getPemagang($username) {
-        $user = User::join('detail_users', 'users.username', '=', 'detail_users.username')
+        $user = User::where('users.username', '=', $username)
+            ->join('detail_users', 'users.username', '=', 'detail_users.username')
             ->select(
                 'detail_users.username',
                 'detail_users.nama',
@@ -455,9 +457,36 @@ class AdminPageController extends Controller
                 'detail_users.browser',
                 'users.status_akun',
                 'users.konfirmasi_admin',
-                'users.email'
-            )->where('detail_users.username', '=', $username)
-            ->first();
+                'users.email',
+                )->first();
+        $alumni = AlumniFiles::where('username', $username)->first();
+        if ($alumni) {
+            $user = User::where('users.username', '=', $username)
+                ->join('detail_users', 'users.username', '=', 'detail_users.username')
+                ->join('alumni_files', 'users.username', '=', 'alumni_files.username')
+                ->select(
+                    'detail_users.username',
+                    'detail_users.nama',
+                    'detail_users.asal_sekolah',
+                    'detail_users.tempat_lahir',
+                    'detail_users.tanggal_lahir',
+                    'detail_users.nomor_hp',
+                    'detail_users.tanggal_masuk',
+                    'detail_users.tanggal_keluar',
+                    'detail_users.nip',
+                    'detail_users.shift_id',
+                    'detail_users.divisi_id',
+                    'detail_users.os',
+                    'detail_users.browser',
+                    'users.status_akun',
+                    'users.konfirmasi_admin',
+                    'users.email',
+                    'alumni_files.sertifikat',
+                    'alumni_files.member_card',
+                    'alumni_files.nilai',
+                    'alumni_files.whatsapp',)
+                    ->first();
+        }
 
         return response()->json(['success' => true, 'user' => $user]);
     }
@@ -481,6 +510,10 @@ class AdminPageController extends Controller
             'browser.string' => 'Browser harus berupa string.',
             'status_akun.string' => 'Status akun harus berupa string.',
             'konfirmasi_admin.string' => 'Konfirmasi admin harus berupa string.',
+            'sertifikat.string' => 'Link Sertifikat harus berupa string.',
+            'member_card.string' => 'Link Member Card harus berupa string.',
+            'nilai.string' => 'Link Nilai harus berupa string.',
+            'whatsapp.string' => 'Link Whatsapp harus berupa string.',
         ];
 
         $validator = Validator::make($request->all(), [
@@ -496,6 +529,10 @@ class AdminPageController extends Controller
             'browser' => 'nullable|string',
             'status_akun' => 'nullable|string',
             'konfirmasi_admin' => 'nullable|boolean',
+            'sertifikat' => 'nullable|string',
+            'member_card' => 'nullable|string',
+            'nilai' => 'nullable|string',
+            'whatsapp' => 'nullable|string',
         ], $messages);
 
         if ($validator->fails()) {
@@ -504,6 +541,12 @@ class AdminPageController extends Controller
 
         $user = User::where('username', $request->username)->first();
         $detailUser = DetailUser::where('username', $request->username)->first();
+        $file = AlumniFiles::where('username', $request->username)->first();
+
+        if (!$file) {
+            $file = new AlumniFiles();
+            $file->username = $request->username;
+        }
 
         $detailUser->tanggal_masuk = $request->tanggal_masuk;
 
@@ -534,9 +577,25 @@ class AdminPageController extends Controller
         if ($request->konfirmasi_admin) {
             $user->konfirmasi_admin = $request->konfirmasi_admin;
         }
+        if ($request->sertifikat || $request->member_card || $request->nilai || $request->whatsapp) {
+            $detailUser->status_pegawai = "lulus";
+        }
+        if ($request->sertifikat) {
+            $file->sertifikat = $request->sertifikat;
+        }
+        if ($request->member_card) {
+            $file->member_card = $request->member_card;
+        }
+        if ($request->nilai) {
+            $file->nilai = $request->nilai;
+        }
+        if ($request->whatsapp) {
+            $file->whatsapp = $request->whatsapp;
+        }
 
         $user->save();
         $detailUser->save();
+        $file->save();
 
         return response()->json(['success' => true, 'message' => 'Sukses']);
     }

@@ -94,7 +94,8 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'login sukses',
                 'username' => $userInfo->username,
-                'nama' => $userInfo->detail->nama
+                'nama' => $userInfo->detail->nama,
+                'status' => $userInfo->detail->status_pegawai
             ]);
         } else {
             Session::flash('error', 'Email atau password salah!');
