@@ -11,19 +11,19 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::post('/log-baru', [LogsController::class, 'logBaru']); //->middleware('allowIP');
+Route::post('/log-baru', [LogsController::class, 'logBaru'])->middleware('allowIP');
 
 Route::post('/get-log', [LogsController::class, 'getLog'])->middleware('allowIP');
 
 Route::post('/get-logs', [LogsController::class, 'getLogs'])->middleware('allowIP');
 
-Route::post('/presensi-masuk', [LogsController::class, 'masuk']); //->middleware('allowIP');
+Route::post('/presensi-masuk', [LogsController::class, 'masuk'])->middleware('allowIP');
 
-Route::post('/presensi-istirahat', [LogsController::class, 'istirahat']); //->middleware('allowIP');
+Route::post('/presensi-istirahat', [LogsController::class, 'istirahat'])->middleware('allowIP');
 
-Route::post('/presensi-kembali', [LogsController::class, 'kembali']); //->middleware('allowIP');
+Route::post('/presensi-kembali', [LogsController::class, 'kembali'])->middleware('allowIP');
 
-Route::post('/presensi-pulang', [LogsController::class, 'pulang']); //->middleware('allowIP');
+Route::post('/presensi-pulang', [LogsController::class, 'pulang'])->middleware('allowIP');
 
 Route::post('/log-activity', [LogsController::class, 'logActivity'])->middleware('allowIP');
 
