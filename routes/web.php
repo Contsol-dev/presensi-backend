@@ -13,6 +13,8 @@ Route::get('/', function () {
 
 Route::get('/users', [UserController::class, 'getUsers']);
 
+Route::get('/alumni/files/{username}', [UserController::class, 'getFiles']);
+
 Route::post('/log-baru', [LogsController::class, 'logBaru']);
 
 Route::post('/get-log', [LogsController::class, 'getLog']);
