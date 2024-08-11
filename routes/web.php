@@ -9,29 +9,29 @@ use App\Http\Controllers\ResetPasswordController;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->middleware('allowIP');
 
-Route::get('/users', [UserController::class, 'getUsers']);
+Route::post('/log-baru', [LogsController::class, 'logBaru'])->middleware('allowIP');
+
+Route::post('/get-log', [LogsController::class, 'getLog'])->middleware('allowIP');
 
 Route::get('/alumni/files/{username}', [UserController::class, 'getFiles']);
 
 Route::post('/log-baru', [LogsController::class, 'logBaru']);
 
-Route::post('/get-log', [LogsController::class, 'getLog']);
+Route::post('/get-logs', [LogsController::class, 'getLogs'])->middleware('allowIP');
 
-Route::post('/get-logs', [LogsController::class, 'getLogs']);
+Route::post('/presensi-masuk', [LogsController::class, 'masuk'])->middleware('allowIP');
 
-Route::post('/presensi-masuk', [LogsController::class, 'masuk']);
+Route::post('/presensi-istirahat', [LogsController::class, 'istirahat'])->middleware('allowIP');
 
-Route::post('/presensi-istirahat', [LogsController::class, 'istirahat']);
+Route::post('/presensi-kembali', [LogsController::class, 'kembali'])->middleware('allowIP');
 
-Route::post('/presensi-kembali', [LogsController::class, 'kembali']);
+Route::post('/presensi-pulang', [LogsController::class, 'pulang'])->middleware('allowIP');
 
-Route::post('/presensi-pulang', [LogsController::class, 'pulang']);
+Route::post('/log-activity', [LogsController::class, 'logActivity'])->middleware('allowIP');
 
-Route::post('/log-activity', [LogsController::class, 'logActivity']);
-
-Route::post('/kebaikan', [LogsController::class, 'kebaikan']);
+Route::post('/kebaikan', [LogsController::class, 'kebaikan'])->middleware('allowIP');
 
 Route::post('/register', [AuthController::class, 'register']);
 
@@ -39,9 +39,11 @@ Route::post('/reset-password', [ResetPasswordController::class, 'generateToken']
 
 Route::get('/reset-password/{token}', [ResetPasswordController::class, 'useToken']);
 
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/new-password', [ResetPasswordController::class, 'newPassword']);
 
-Route::get('/logout', [AuthController::class, 'logout']);
+Route::post('/login', [AuthController::class, 'login']); //->middleware('allowIP');
+
+Route::get('/logout', [AuthController::class, 'logout']); //->middleware('allowIP');
 
 Route::post('/admin/login', [AuthController::class, 'adminLogin']);
 
@@ -115,7 +117,7 @@ Route::get('admin/manage-divisi/get/{division_id}', [AdminPageController::class,
 
 Route::get('/admin/manage-penilaian-subkategori/{id}',
     [AdminPageController::class, 'deleteSubkategori']
-);
+)->middleware('allowIP');
 
 Route::get('/admin/manage-penilaian/{division_id}', [AdminPageController::class, 'getPenilaian']);
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DetailUser;
 use App\Models\Log;
 use App\Models\User;
 use Carbon\Carbon;
@@ -59,7 +60,15 @@ class LogsController extends Controller
         $log = Log::where('username', '=', $request->username)
             ->where('tanggal', '=', $request->tanggal)
             ->first();
-        return response()->json(['log' => $log]);
+
+        $shift = DetailUser::where('username', $request->username)
+                ->with('shift')
+                ->first();
+        return response()->json([
+            'log' => $log,
+            'detail' => $shift->shift->nama_shift,
+            'nip' => $shift->nip
+        ]);
     }
 
     public function getLogs(Request $request) {
@@ -93,15 +102,24 @@ class LogsController extends Controller
                     ->where('tanggal', $request->tanggal)
                     ->first();
 
+        $shift = DetailUser::where('username', $request->username)
+                            ->with('shift')
+                            ->first();
+
         if ($log) {
+            $jam = $shift->shift->masuk;
+            $terlambat = $request->masuk > $jam;
+
             $log->masuk = $request->masuk;
             $log->kehadiran = "hadir";
+            $log->terlambat_masuk = $terlambat;
             $log->save();
 
             return response()->json([
                 'message' => 'Sukses update jam masuk',
                 'masuk' => $log->masuk,
-                'next' => 'istirahat'
+                'terlambat_masuk' => $terlambat,
+                'next' => 'istirahat',
             ], 200);
         } else {
             return response()->json([
@@ -128,22 +146,27 @@ class LogsController extends Controller
                     ->where('tanggal', $request->tanggal)
                     ->first();
 
-        // if (!Auth::check()) {
-        //     return response()->json(['message' => 'Unauthorized'], 401);
-        // }
+        $shift = DetailUser::where('username', $request->username)
+                    ->with('shift')
+                    ->first();
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
         }
 
         if ($log) {
+            $jam = $shift->shift->istirahat;
+            $istirahat_awal = $request->istirahat < $jam;
+
             $log->istirahat = $request->istirahat;
+            $log->istirahat_awal = $istirahat_awal;
             $log->save();
 
             return response()->json([
                 'message' => 'Sukses update jam istirahat',
                 'istirahat' => $log->istirahat,
-                'next' => 'kembali'
+                'istirahat_awal' => $istirahat_awal,
+                'next' => 'kembali',
             ], 200);
         } else {
             return response()->json([
@@ -166,10 +189,6 @@ class LogsController extends Controller
             'kembali' => 'required|date_format:H:i:s',
         ], $messages);
 
-        // if (!Auth::check()) {
-        //     return response()->json(['message' => 'Uanuthorized'], 401);
-        // }
-
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
         }
@@ -178,13 +197,22 @@ class LogsController extends Controller
                     ->where('tanggal', $request->tanggal)
                     ->first();
 
+        $shift = DetailUser::where('username', $request->username)
+                    ->with('shift')
+                    ->first();
+
         if ($log) {
+            $jam = $shift->shift->kembali;
+            $terlambat_kembali = $request->kembali > $jam;
+
             $log->kembali = $request->kembali;
+            $log->terlambat_kembali = $terlambat_kembali;
             $log->save();
 
             return response()->json([
                 'message' => 'Sukses update jam kembali',
                 'kembali' => $log->kembali,
+                'terlambat_kembali' => $terlambat_kembali,
                 'next' => 'pulang'
             ], 200);
         } else {
@@ -208,10 +236,6 @@ class LogsController extends Controller
             'pulang' => 'required|date_format:H:i:s',
         ], $messages);
 
-        // if (!Auth::check()) {
-        //     return response()->json(['message' => 'Unauthorized'], 401);
-        // }
-
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()]);
         }
@@ -220,13 +244,22 @@ class LogsController extends Controller
                     ->where('tanggal', $request->tanggal)
                     ->first();
 
+        $shift = DetailUser::where('username', $request->username)
+                    ->with('shift')
+                    ->first();
+
         if ($log) {
+            $jam = $shift->shift->pulang;
+            $pulang_awal = $request->pulang < $jam;
+            
             $log->pulang = $request->pulang;
+            $log->pulang_awal = $pulang_awal;
             $log->save();
 
             return response()->json([
                 'message' => 'Sukses update jam kembali',
                 'pulang' => $log->pulang,
+                'pulang_awal' => $pulang_awal,
                 'next' => ''
             ], 200);
         } else {
@@ -235,7 +268,7 @@ class LogsController extends Controller
             ], 404);
         }
     }
-
+    
     public function kebaikan(Request $request) {
         $messages = [
             'username.exists' => 'User tidak ada',
