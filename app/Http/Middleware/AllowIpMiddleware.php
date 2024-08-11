@@ -16,14 +16,14 @@ class AllowIpMiddleware
     public function handle(Request $request, Closure $next)
     {
         // ip dari 192.168.1.1 sampai 192.168.1.10
-        $allowedIpRangeStart = ip2long('192.168.1.1');
-        $allowedIpRangeEnd = ip2long('192.168.1.10');
+        $allowedIpRangeStart = ip2long('192.168.127.1');
+        $allowedIpRangeEnd = ip2long('192.168.127.50');
 
         $userIp = ip2long($request->ip());
 
-        if ($userIp < $allowedIpRangeStart || $userIp > $allowedIpRangeEnd) {
-            return response()->json(['message' => 'Unauthorized.'], 403);
-        }
+        // if ($userIp < $allowedIpRangeStart || $userIp > $allowedIpRangeEnd) {
+        //     return response()->json(['message' => 'Unauthorized.'], 403);
+        // }
 
         //untuk semua dari ip 192.168.1.x
         // $allowedIps = [
