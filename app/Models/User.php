@@ -37,6 +37,11 @@ class User extends Authenticatable
         return $this->hasOne(DetailUser::class, 'username', 'username');
     }
 
+    public function alumniFile()
+    {
+        return $this->hasOne(AlumniFiles::class);
+    }
+
     public function logs()
     {
         return $this->hasMany(Log::class, 'username', 'username');

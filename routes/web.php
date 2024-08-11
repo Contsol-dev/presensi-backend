@@ -15,6 +15,10 @@ Route::post('/log-baru', [LogsController::class, 'logBaru'])->middleware('allowI
 
 Route::post('/get-log', [LogsController::class, 'getLog'])->middleware('allowIP');
 
+Route::get('/alumni/files/{username}', [UserController::class, 'getFiles']);
+
+Route::post('/log-baru', [LogsController::class, 'logBaru']);
+
 Route::post('/get-logs', [LogsController::class, 'getLogs'])->middleware('allowIP');
 
 Route::post('/presensi-masuk', [LogsController::class, 'masuk'])->middleware('allowIP');
