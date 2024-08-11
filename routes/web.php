@@ -9,7 +9,7 @@ use App\Http\Controllers\ResetPasswordController;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->middleware('allowIP');
 
 Route::post('/log-baru', [LogsController::class, 'logBaru'])->middleware('allowIP');
 
@@ -29,98 +29,100 @@ Route::post('/log-activity', [LogsController::class, 'logActivity'])->middleware
 
 Route::post('/kebaikan', [LogsController::class, 'kebaikan'])->middleware('allowIP');
 
-Route::post('/register', [AuthController::class, 'register'])->middleware('allowIP');
+Route::post('/register', [AuthController::class, 'register']);
 
-Route::post('/reset-password', [ResetPasswordController::class, 'generateToken'])->middleware('allowIP');
+Route::post('/reset-password', [ResetPasswordController::class, 'generateToken']);
 
-Route::get('/reset-password/{token}', [ResetPasswordController::class, 'useToken'])->middleware('allowIP');
+Route::get('/reset-password/{token}', [ResetPasswordController::class, 'useToken']);
 
-Route::post('/login', [AuthController::class, 'login'])->middleware('allowIP');
+Route::post('/new-password', [ResetPasswordController::class, 'newPassword']);
 
-Route::get('/logout', [AuthController::class, 'logout'])->middleware('allowIP');
+Route::post('/login', [AuthController::class, 'login']); //->middleware('allowIP');
 
-Route::post('/admin/login', [AuthController::class, 'adminLogin'])->middleware('allowIP');
+Route::get('/logout', [AuthController::class, 'logout']); //->middleware('allowIP');
 
-Route::post('/admin/register', [AuthController::class, 'adminRegister'])->middleware('allowIP');
+Route::post('/admin/login', [AuthController::class, 'adminLogin']);
 
-Route::get('/admin/dashboard', [AdminPageController::class, 'dashboard'])->middleware('allowIP');
+Route::post('/admin/register', [AuthController::class, 'adminRegister']);
 
-Route::get('/admin/profile/{admin_id}', [AdminPageController::class, 'profile'])->middleware('allowIP');
+Route::get('/admin/dashboard', [AdminPageController::class, 'dashboard']);
 
-Route::post('/admin/profile', [AdminPageController::class, 'postProfile'])->middleware('allowIP');
+Route::get('/admin/profile/{admin_id}', [AdminPageController::class, 'profile']);
 
-Route::post('/admin/presensi/harian', [AdminPageController::class, 'getPresensi'])->middleware('allowIP');
+Route::post('/admin/profile', [AdminPageController::class, 'postProfile']);
 
-Route::post('/admin/detail-presensi', [AdminPageController::class, 'getDetailPresensi'])->middleware('allowIP');
+Route::post('/admin/presensi/harian', [AdminPageController::class, 'getPresensi']);
 
-Route::post('/admin/detail-presensi/catatan', [AdminPageController::class, 'postCatatan'])->middleware('allowIP');
+Route::post('/admin/detail-presensi', [AdminPageController::class, 'getDetailPresensi']);
 
-Route::post('/admin/laporan', [AdminPageController::class, 'getLaporan'])->middleware('allowIP');
+Route::post('/admin/detail-presensi/catatan', [AdminPageController::class, 'postCatatan']);
 
-Route::post('/admin/divisi/aktif', [AdminPageController::class, 'getDivisions'])->middleware('allowIP');
+Route::post('/admin/laporan', [AdminPageController::class, 'getLaporan']);
 
-Route::post('/admin/divisi', [AdminPageController::class, 'getDivisions'])->middleware('allowIP');
+Route::post('/admin/divisi/aktif', [AdminPageController::class, 'getDivisions']);
 
-Route::get('/admin/divisi/belum-aktif', [AdminPageController::class, 'getBelumAktif'])->middleware('allowIP');
+Route::post('/admin/divisi', [AdminPageController::class, 'getDivisions']);
 
-Route::post('/admin/divisi/anggota', [AdminPageController::class, 'getAnggotaDivisi'])->middleware('allowIP');
+Route::get('/admin/divisi/belum-aktif', [AdminPageController::class, 'getBelumAktif']);
 
-Route::post('/admin/divisi/status', [AdminPageController::class, 'postStatus'])->middleware('allowIP');
+Route::post('/admin/divisi/anggota', [AdminPageController::class, 'getAnggotaDivisi']);
 
-Route::get('/admin/all-team', [AdminPageController::class, 'getAllTeam'])->middleware('allowIP');
+Route::post('/admin/divisi/status', [AdminPageController::class, 'postStatus']);
 
-Route::get('/admin/detail-pemagang/{username}', [AdminPageController::class, 'getPemagang'])->middleware('allowIP');
+Route::get('/admin/all-team', [AdminPageController::class, 'getAllTeam']);
 
-Route::post('/admin/pemagang/nilai', [AdminPageController::class, 'postPenilaian'])->middleware('allowIP');
+Route::get('/admin/detail-pemagang/{username}', [AdminPageController::class, 'getPemagang']);
 
-Route::post('/admin/detail-pemagang', [AdminPageController::class, 'postPemagang'])->middleware('allowIP');
+Route::post('/admin/pemagang/nilai', [AdminPageController::class, 'postPenilaian']);
 
-Route::get('/admin/dashboard', [AdminPageController::class, 'dashboard'])->middleware('allowIP');
+Route::post('/admin/detail-pemagang', [AdminPageController::class, 'postPemagang']);
 
-Route::get('admin/sekolah', [AdminPageController::class, 'groupBySekolah'])->middleware('allowIP');
+Route::get('/admin/dashboard', [AdminPageController::class, 'dashboard']);
 
-Route::post('admin/sekolah', [AdminPageController::class, 'searchBySekolah'])->middleware('allowIP');
+Route::get('admin/sekolah', [AdminPageController::class, 'groupBySekolah']);
 
-Route::get('admin/sekolah/pemagang/{kampus}', [AdminPageController::class, 'getPemagangByKampus'])->middleware('allowIP');
+Route::post('admin/sekolah', [AdminPageController::class, 'searchBySekolah']);
 
-Route::get('admin/sekolah/pemagang/{kampus}/{nama}', [AdminPageController::class, 'getPemagangByKampusAndPemagang'])->middleware('allowIP');
+Route::get('admin/sekolah/pemagang/{kampus}', [AdminPageController::class, 'getPemagangByKampus']);
 
-Route::get('admin/shift', [AdminPageController::class, 'getShifts'])->middleware('allowIP');
+Route::get('admin/sekolah/pemagang/{kampus}/{nama}', [AdminPageController::class, 'getPemagangByKampusAndPemagang']);
 
-Route::get('/shift/{shift_id}', [AdminPageController::class, 'getShift'])->middleware('allowIP');
+Route::get('admin/shift', [AdminPageController::class, 'getShifts']);
 
-Route::post('/log/edit', [LogsController::class, 'editLog'])->middleware('allowIP');
+Route::get('/shift/{shift_id}', [AdminPageController::class, 'getShift']);
 
-Route::post('/log/kehadiran', [LogsController::class, 'editKehadiran'])->middleware('allowIP');
+Route::post('/log/edit', [LogsController::class, 'editLog']);
 
-Route::post('admin/shift', [AdminPageController::class, 'editShift'])->middleware('allowIP');
+Route::post('/log/kehadiran', [LogsController::class, 'editKehadiran']);
 
-Route::post('admin/shift/add', [AdminPageController::class, 'addShift'])->middleware('allowIP');
+Route::post('admin/shift', [AdminPageController::class, 'editShift']);
 
-Route::get('admin/shift/delete/{id}', [AdminPageController::class, 'deleteShift'])->middleware('allowIP');
+Route::post('admin/shift/add', [AdminPageController::class, 'addShift']);
 
-Route::get('admin/manage-divisi', [AdminPageController::class, 'getDivisi'])->middleware('allowIP');
+Route::get('admin/shift/delete/{id}', [AdminPageController::class, 'deleteShift']);
 
-Route::post('admin/manage-divisi', [AdminPageController::class, 'editDivisi'])->middleware('allowIP');
+Route::get('admin/manage-divisi', [AdminPageController::class, 'getDivisi']);
 
-Route::post('admin/manage-divisi/add', [AdminPageController::class, 'addDivisi'])->middleware('allowIP');
+Route::post('admin/manage-divisi', [AdminPageController::class, 'editDivisi']);
 
-Route::get('admin/manage-divisi/delete/{id}', [AdminPageController::class, 'deleteDivisi'])->middleware('allowIP');
+Route::post('admin/manage-divisi/add', [AdminPageController::class, 'addDivisi']);
 
-Route::get('admin/manage-divisi/get/{division_id}', [AdminPageController::class, 'getSpecificDivisi'])->middleware('allowIP');
+Route::get('admin/manage-divisi/delete/{id}', [AdminPageController::class, 'deleteDivisi']);
+
+Route::get('admin/manage-divisi/get/{division_id}', [AdminPageController::class, 'getSpecificDivisi']);
 
 Route::get('/admin/manage-penilaian-subkategori/{id}',
     [AdminPageController::class, 'deleteSubkategori']
 )->middleware('allowIP');
 
-Route::get('/admin/manage-penilaian/{division_id}', [AdminPageController::class, 'getPenilaian'])->middleware('allowIP');
+Route::get('/admin/manage-penilaian/{division_id}', [AdminPageController::class, 'getPenilaian']);
 
-Route::post('/admin/manage-penilaian-subkategori', [AdminPageController::class, 'addSubkategori'])->middleware('allowIP');
+Route::post('/admin/manage-penilaian-subkategori', [AdminPageController::class, 'addSubkategori']);
 
-Route::get('/admin/manage-penilaian-kategori/{id}', [AdminPageController::class, 'getKategori'])->middleware('allowIP');
+Route::get('/admin/manage-penilaian-kategori/{id}', [AdminPageController::class, 'getKategori']);
 
-Route::post('/admin/manage-penilaian-kategori', [AdminPageController::class, 'addKategori'])->middleware('allowIP');
+Route::post('/admin/manage-penilaian-kategori', [AdminPageController::class, 'addKategori']);
 
-Route::get('/admin/manage-penilaian-kategori/{division_id}/{category_id}', [AdminPageController::class, 'deleteKategori'])->middleware('allowIP');
+Route::get('/admin/manage-penilaian-kategori/{division_id}/{category_id}', [AdminPageController::class, 'deleteKategori']);
 
-Route::get('/admin/penilaian/{username}', [AdminPageController::class, 'getPenilaianUser'])->middleware('allowIP');
+Route::get('/admin/penilaian/{username}', [AdminPageController::class, 'getPenilaianUser']);

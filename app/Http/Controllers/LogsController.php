@@ -60,7 +60,15 @@ class LogsController extends Controller
         $log = Log::where('username', '=', $request->username)
             ->where('tanggal', '=', $request->tanggal)
             ->first();
-        return response()->json(['log' => $log]);
+
+        $shift = DetailUser::where('username', $request->username)
+                ->with('shift')
+                ->first();
+        return response()->json([
+            'log' => $log,
+            'detail' => $shift->shift->nama_shift,
+            'nip' => $shift->nip
+        ]);
     }
 
     public function getLogs(Request $request) {

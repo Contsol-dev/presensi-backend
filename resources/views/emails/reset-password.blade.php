@@ -5,7 +5,7 @@
 </head>
 <body>
     <h1>Pemberitahuan Reset Password</h1>
-    <p>Klik link di bawah untuk mereset password akun anda:</p>
-    <a href="{{ url('/reset-password/' . $token) }}">Reset Password</a>
+    <p>Redeem Token Untuk Mereset Password Akun Anda:</p><br>
+    <h2>{{ $token }}</h2>
 </body>
 </html>
